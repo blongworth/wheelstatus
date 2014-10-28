@@ -7,6 +7,22 @@
 
 library(shiny)
 
+#Get available wheels
+
+usamspath = "H:/USAMS/Results"
+cfamspath = "H:/CFAMS/Results"
+system = 1
+
+if (system == 1) {
+  wheelpath = usamspath
+} else if (system == 2) {
+  wheelpath = cfamspath
+} else {
+  #Stop
+}
+
+wheels = list.files(path = wheelpath, pattern = "*AMS*.*")
+
 shinyUI(fluidPage(
 
   # Application title
