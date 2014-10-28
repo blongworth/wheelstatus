@@ -19,12 +19,20 @@ shinyUI(fluidPage(
       selectInput("wheel",
                   label = h3("Wheel"),
                   choices = wheels
-                  )
+                  ),
+      radioButtons("type", label = h3("Sample type"),
+                   choices = list("Standards" = 1, "Blanks" = 2, "All samples" = 3),
+                   selected = 1)
+      
     ),
 
     # Show a plot of the generated distribution
     mainPanel(
-      plotOutput("curPlot")
+      plotOutput("ratPlot"),
+      
+      plotOutput("curPlot"),
+      
+      htmlOutput("plotly") 
     )
   )
 ))
