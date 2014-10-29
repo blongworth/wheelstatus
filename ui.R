@@ -7,21 +7,6 @@
 
 library(shiny)
 
-#Get available wheels
-
-usamspath = "H:/USAMS/Results"
-cfamspath = "H:/CFAMS/Results"
-system = 1
-
-if (system == 1) {
-  wheelpath = usamspath
-} else if (system == 2) {
-  wheelpath = cfamspath
-} else {
-  #Stop
-}
-
-wheels = list.files(path = wheelpath, pattern = "*AMS*.*")
 
 shinyUI(fluidPage(
 
@@ -32,11 +17,14 @@ shinyUI(fluidPage(
   sidebarLayout(
     sidebarPanel(
       
-      selectInput("wheel",
+      radioButtons("system", label = h3("System"),
+                   choices = list("USAMS" = 1, "CFAMS" = 2),
+                   selected = 1),
+      selectInput("wheelSelect",
                   label = h3("Wheel"),
-                  choices = wheels,
-                  selected = tail(wheels, n = 1)
-                  ),
+                  c("label 1" = "option1",
+                    "label 2" = "option2")),
+                  
       radioButtons("type", label = h3("Sample type"),
                    choices = list("Standards" = 1, "Blanks" = 2, "All samples" = 3),
                    selected = 1)

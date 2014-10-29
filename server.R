@@ -10,7 +10,7 @@ library(ggplot2)
 library(plotly)
 
 usamspath = "H:/USAMS/Results"
-cfamspath = "H:/CFAMS/Results"
+cfamspath = "H:/CFAMS/CFAMS Results"
 #system = 1
 
 #Define functions
@@ -26,36 +26,40 @@ readCFWheel = function (file) {
   z
 }
 
-
-#Get available wheels
-
-getWheels <- function(system) {
-  
-  if (system == 1) {
-    wheelpath = usamspath
-  } else if (system == 2) {
-    wheelpath = cfamspath
-  } else {
-    #Stop
-  }
-  
-  list.files(path = wheelpath, pattern = "*AMS*.*")
-  
-}
-
 shinyServer(function(input, output, clientData, session) {
   
   observe({
     
     #get wheels based on system
-    wheels <- getWheels(input$system)
+    if (input$system == 1) {
+      wheelpath = usamspath
+    } else if (input$system == 2) {
+      wheelpath = cfamspath
+    } else {
+      #Stop
+    }
+    
+    wheels <- list.files(path = wheelpath, pattern = "*AMS*.*")
     
     # Change values for input$wheelSelect
     updateSelectInput(session, "wheelSelect",
-                      choices = wheels)
+                      choices = wheels,
+                      selected = tail(wheels, n = 1))
+  
   })
 
   output$ratPlot <- renderPlot({
+    
+    #get wheels based on system
+    if (input$system == 1) {
+      wheelpath = usamspath
+    } else if (input$system == 2) {
+      wheelpath = cfamspath
+    } else {
+      #Stop
+    }
+    
+    
     file <- paste(wheelpath, input$wheelSelect, sep = "/")
     z <- readCFWheel(file)
     
@@ -69,6 +73,16 @@ shinyServer(function(input, output, clientData, session) {
   })
   
   output$curPlot <- renderPlot({
+    
+    #get wheels based on system
+    if (input$system == 1) {
+      wheelpath = usamspath
+    } else if (input$system == 2) {
+      wheelpath = cfamspath
+    } else {
+      #Stop
+    }
+    
     file <- paste(wheelpath, input$wheelSelect, sep = "/")
     z <- readCFWheel(file)
     if (input$type == 1) {
