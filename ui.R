@@ -34,7 +34,8 @@ shinyUI(fluidPage(
       
       selectInput("wheel",
                   label = h3("Wheel"),
-                  choices = wheels
+                  choices = wheels,
+                  selected = tail(wheels, n = 1)
                   ),
       radioButtons("type", label = h3("Sample type"),
                    choices = list("Standards" = 1, "Blanks" = 2, "All samples" = 3),

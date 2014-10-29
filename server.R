@@ -11,7 +11,7 @@ library(plotly)
 
 usamspath = "H:/USAMS/Results"
 cfamspath = "H:/CFAMS/Results"
-system = 1
+#system = 1
 
 #Define functions
 
@@ -29,20 +29,34 @@ readCFWheel = function (file) {
 
 #Get available wheels
 
-if (system == 1) {
-  wheelpath = usamspath
-} else if (system == 2) {
-  wheelpath = cfamspath
-} else {
-  #Stop
+getWheels <- function(system) {
+  
+  if (system == 1) {
+    wheelpath = usamspath
+  } else if (system == 2) {
+    wheelpath = cfamspath
+  } else {
+    #Stop
+  }
+  
+  list.files(path = wheelpath, pattern = "*AMS*.*")
+  
 }
 
-wheels = list.files(path = wheelpath, pattern = "*AMS*.*")
-
-shinyServer(function(input, output) {
+shinyServer(function(input, output, clientData, session) {
+  
+  observe({
+    
+    #get wheels based on system
+    wheels <- getWheels(input$system)
+    
+    # Change values for input$wheelSelect
+    updateSelectInput(session, "wheelSelect",
+                      choices = wheels)
+  })
 
   output$ratPlot <- renderPlot({
-    file <- paste(wheelpath, input$wheel, sep = "/")
+    file <- paste(wheelpath, input$wheelSelect, sep = "/")
     z <- readCFWheel(file)
     
     if (input$type == 1) {
@@ -55,7 +69,7 @@ shinyServer(function(input, output) {
   })
   
   output$curPlot <- renderPlot({
-    file <- paste(wheelpath, input$wheel, sep = "/")
+    file <- paste(wheelpath, input$wheelSelect, sep = "/")
     z <- readCFWheel(file)
     if (input$type == 1) {
       z <- z[z$Num == "S",]
