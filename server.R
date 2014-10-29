@@ -69,7 +69,7 @@ shinyServer(function(input, output, clientData, session) {
       z <- z[z$Num == "B",]
     }
     
-    qplot(ts, X14.12he, color=as.factor(Pos), data=z)
+    qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=z)
   })
   
   output$curPlot <- renderPlot({
@@ -84,6 +84,7 @@ shinyServer(function(input, output, clientData, session) {
     }
     
     file <- paste(wheelpath, input$wheelSelect, sep = "/")
+    
     z <- readCFWheel(file)
     if (input$type == 1) {
       z <- z[z$Num == "S",]
@@ -91,7 +92,7 @@ shinyServer(function(input, output, clientData, session) {
       z <- z[z$Num == "B",]
     }
     
-    qplot(ts, he12C, color=as.factor(Pos), data=z)
+    qplot(ts, he12C, color=as.factor(Pos), size = 4, data=z)
   })
   
  
