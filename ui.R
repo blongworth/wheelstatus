@@ -30,6 +30,11 @@ shinyUI(fluidPage(
                    selected = 1)
       
     ),
+    
+#     sidebarPanel(
+#       textOutput("
+      
+      
 
     # Show a plot of the generated distribution
     mainPanel(

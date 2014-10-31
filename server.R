@@ -48,8 +48,7 @@ shinyServer(function(input, output, clientData, session) {
   
   })
 
-  output$ratPlot <- renderPlot({
-    
+  wheelData <- reactive({
     #get wheels based on system
     if (input$system == 1) {
       wheelpath = usamspath
@@ -69,31 +68,21 @@ shinyServer(function(input, output, clientData, session) {
       z <- z[z$Num == "B",]
     }
     
-    qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=z)
+    z
+    
   })
+  
+  output$ratPlot <- renderPlot({
+    
+    qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=wheelData())
+  
+    })
   
   output$curPlot <- renderPlot({
     
-    #get wheels based on system
-    if (input$system == 1) {
-      wheelpath = usamspath
-    } else if (input$system == 2) {
-      wheelpath = cfamspath
-    } else {
-      #Stop
-    }
-    
-    file <- paste(wheelpath, input$wheelSelect, sep = "/")
-    
-    z <- readCFWheel(file)
-    if (input$type == 1) {
-      z <- z[z$Num == "S",]
-    } else if (input$type == 2) {
-      z <- z[z$Num == "B",]
-    }
-    
-    qplot(ts, he12C, color=as.factor(Pos), size = 4, data=z)
-  })
+    qplot(ts, he12C, color=as.factor(Pos), size = 4, data=wheelData())
+  
+    })
   
  
 })
