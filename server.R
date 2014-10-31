@@ -57,30 +57,35 @@ shinyServer(function(input, output, clientData, session) {
     } else {
       #Stop
     }
-    
-    
+        
     file <- paste(wheelpath, input$wheelSelect, sep = "/")
-    z <- readCFWheel(file)
+    readCFWheel(file)
+          
+  })
+  
+  output$ratPlot <- renderPlot({
     
+    z <- wheelData()
     if (input$type == 1) {
       z <- z[z$Num == "S",]
     } else if (input$type == 2) {
       z <- z[z$Num == "B",]
     }
     
-    z
-    
-  })
-  
-  output$ratPlot <- renderPlot({
-    
-    qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=wheelData())
+    qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=z)
   
     })
   
+ 
   output$curPlot <- renderPlot({
     
-    qplot(ts, he12C, color=as.factor(Pos), size = 4, data=wheelData())
+    z <- wheelData()
+    if (input$type == 1) {
+      z <- z[z$Num == "S",]
+    } else if (input$type == 2) {
+      z <- z[z$Num == "B",]
+    }
+    qplot(ts, he12C, color=as.factor(Pos), size = 4, data=z)
   
     })
   
