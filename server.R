@@ -8,6 +8,8 @@
 library(shiny)
 library(ggplot2)
 library(plotly)
+library(dplyr)
+
 
 usamspath = "H:/USAMS/Results"
 cfamspath = "H:/CFAMS/CFAMS Results"
@@ -61,6 +63,36 @@ shinyServer(function(input, output, clientData, session) {
     file <- paste(wheelpath, input$wheelSelect, sep = "/")
     readCFWheel(file)
           
+  })
+  
+  output$stdMean <- renderText({ 
+    
+    z <- wheelData()
+    m <- mean(z[z$Num == "S",15])
+    s <- sd(z[z$Num == "S",15])
+    sprintf("Mean of Standards is %.3e SD %.3e", m, s)
+    
+  })
+  
+  output$lastRun <- renderText({ 
+    
+    z <- wheelData()
+    l <- tail(z$Run.Completion.Time, n = 1)
+    
+    paste("Last run was ", l)
+    
+  })
+  
+  output$endTime <- renderText({ 
+    
+    z <- wheelData()
+    l <- tail(z, n = 1)
+    r <- 401 - 40 * (l$Meas - 1) - l$Pos
+    t <- r + 180
+    h <- t / 3600
+    
+    sprintf("%d runs to go, which will take about %.1f hours", r, h)
+    
   })
   
   output$ratPlot <- renderPlot({

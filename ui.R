@@ -32,7 +32,8 @@ shinyUI(fluidPage(
     ),
     
 #     sidebarPanel(
-#       textOutput("
+#       textOutput("stdMean")
+#     ),
       
       
 
@@ -42,7 +43,11 @@ shinyUI(fluidPage(
       
       plotOutput("curPlot"),
       
-      htmlOutput("plotly") 
+      textOutput("stdMean"),
+      
+      textOutput("lastRun"),
+      
+      textOutput("endTime")
     )
   )
 ))
