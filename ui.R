@@ -27,7 +27,11 @@ shinyUI(fluidPage(
                   
       radioButtons("type", label = h3("Sample type"),
                    choices = list("Standards" = 1, "Blanks" = 2, "All samples" = 3),
-                   selected = 1)
+                   selected = 1),
+      
+      checkboxInput("box", label = "Boxplot?", value = FALSE),
+      
+      actionButton("reload", "Refresh Data")
       
     ),
     

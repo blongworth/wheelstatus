@@ -59,7 +59,9 @@ shinyServer(function(input, output, clientData, session) {
     } else {
       #Stop
     }
-        
+    
+    input$reload
+    
     file <- paste(wheelpath, input$wheelSelect, sep = "/")
     readCFWheel(file)
           
@@ -88,7 +90,7 @@ shinyServer(function(input, output, clientData, session) {
     z <- wheelData()
     l <- tail(z, n = 1)
     r <- 401 - 40 * (l$Meas - 1) - l$Pos
-    t <- r + 180
+    t <- r * 180
     h <- t / 3600
     
     sprintf("%d runs to go, which will take about %.1f hours", r, h)
@@ -104,9 +106,15 @@ shinyServer(function(input, output, clientData, session) {
       z <- z[z$Num == "B",]
     }
     
-    qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=z)
+    if (input$box == 1) {
+      #try position_dodge to add points to boxplot
+      ggplot(z, aes(factor(Pos), X14.12he, color = Num)) + geom_boxplot()
   
-    })
+    } else {
+      qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=z)
+    }  
+  
+  })
   
  
   output$curPlot <- renderPlot({
@@ -117,9 +125,16 @@ shinyServer(function(input, output, clientData, session) {
     } else if (input$type == 2) {
       z <- z[z$Num == "B",]
     }
-    qplot(ts, he12C, color=as.factor(Pos), size = 4, data=z)
-  
-    })
+    
+    if (input$box == 1) {
+      #try position_dodge to add points to boxplot
+      ggplot(z, aes(factor(Pos), he12C, color = Num)) + geom_boxplot()
+      
+    } else {
+      qplot(ts, he12C, color=as.factor(Pos), size = 4, data=z)
+    }  
+    
+  })
   
  
 })
