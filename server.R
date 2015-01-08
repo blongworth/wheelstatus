@@ -111,7 +111,8 @@ shinyServer(function(input, output, clientData, session) {
       ggplot(z, aes(factor(Pos), X14.12he, color = Num)) + geom_boxplot()
   
     } else {
-      qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=z)
+      ggplot(z, aes(ts, X14.12he, color = Num)) + geom_point(size=4)
+      #qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=z)
     }  
   
   })
@@ -131,7 +132,7 @@ shinyServer(function(input, output, clientData, session) {
       ggplot(z, aes(factor(Pos), he12C, color = Num)) + geom_boxplot()
       
     } else {
-      qplot(ts, he12C, color=as.factor(Pos), size = 4, data=z)
+      ggplot(z, aes(ts, he12C, color = Num)) + geom_point(size=4)
     }  
     
   })
