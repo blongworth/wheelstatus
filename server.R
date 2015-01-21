@@ -7,12 +7,12 @@
 
 library(shiny)
 library(ggplot2)
-library(plotly)
+#library(plotly)
 library(dplyr)
 
 
-usamspath = "H:/USAMS/Results"
-cfamspath = "H:/CFAMS/CFAMS Results"
+usamspath = "/mnt/shared/USAMS/Results"
+cfamspath = "/mnt/shared/CFAMS/CFAMS Results"
 #system = 1
 
 #Define functions
@@ -25,6 +25,10 @@ readCFWheel = function (file) {
   z$ts = as.POSIXct(strptime(z$Run.Completion.Time, format = "%a %b %d %H:%M:%S %y"))
   #Add counting error
   z$ce = 1/sqrt(z$CntTotGT)
+  #Convert ratio to 1E12
+  z$X14.12he = z$X14.12he * 1E12
+  #Convert current to uA
+  z$he12C = z$he12C * 1E6
   z
 }
 
@@ -70,8 +74,8 @@ shinyServer(function(input, output, clientData, session) {
   output$stdMean <- renderText({ 
     
     z <- wheelData()
-    m <- mean(z[z$Num == "S",15])
-    s <- sd(z[z$Num == "S",15])
+    m <- mean(z[z$Num == "S",15]) * 10E-13
+    s <- sd(z[z$Num == "S",15]) * 10E-13
     sprintf("Mean of Standards is %.3e SD %.3e", m, s)
     
   })
@@ -108,10 +112,16 @@ shinyServer(function(input, output, clientData, session) {
     
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
-      ggplot(z, aes(factor(Pos), X14.12he, color = Num)) + geom_boxplot()
+      ggplot(z, aes(factor(Pos), X14.12he, color = Num)) + geom_boxplot() + geom_boxplot() + 
+        ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
+        theme(axis.title.x = element_blank()) + theme(legend.position="none") +
+        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
   
     } else {
-      ggplot(z, aes(ts, X14.12he, color = Num)) + geom_point(size=4)
+      ggplot(z, aes(ts, X14.12he, color = Num)) + geom_point(size=3.5) + 
+        ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
+        theme(axis.title.x = element_blank()) + theme(legend.position="none") +
+        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
       #qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=z)
     }  
   
@@ -129,10 +139,16 @@ shinyServer(function(input, output, clientData, session) {
     
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
-      ggplot(z, aes(factor(Pos), he12C, color = Num)) + geom_boxplot()
+      ggplot(z, aes(factor(Pos), he12C, color = Num)) + geom_boxplot() + 
+        ylab(expression(paste("He 12C (", mu,"A)"))) +
+        theme(axis.title.x = element_blank()) + theme(legend.position="none") +
+        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
       
     } else {
-      ggplot(z, aes(ts, he12C, color = Num)) + geom_point(size=4)
+      ggplot(z, aes(ts, he12C, color = Num)) + geom_point(size=3.5) + 
+        ylab(expression(paste("He 12C (", mu,"A)"))) +
+        theme(axis.title.x = element_blank()) + theme(legend.position="none") +
+        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
     }  
     
   })
