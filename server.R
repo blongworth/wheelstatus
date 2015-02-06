@@ -9,6 +9,7 @@ library(shiny)
 library(ggplot2)
 #library(plotly)
 library(dplyr)
+library(RColorBrewer)
 
 
 usamspath = "/mnt/shared/USAMS/Results"
@@ -112,7 +113,15 @@ shinyServer(function(input, output, clientData, session) {
   
   output$ratPlot <- renderPlot({
     
+    
     z <- wheelData()
+    
+    #Create a custom color scale
+    myColors <- brewer.pal(4,"Set1")
+    names(myColors) <- levels(z$Num)
+    colScale <- scale_colour_manual(name = "Num",values = myColors)
+    
+    #Subset based on input
     if (input$type == 1) {
       z <- z[z$Num == "S",]
     } else if (input$type == 2) {
@@ -121,15 +130,18 @@ shinyServer(function(input, output, clientData, session) {
     
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
-      ggplot(z, aes(factor(Pos), X14.12he, color = Num)) + geom_boxplot() + geom_boxplot() + 
+      ggplot(z, aes(factor(Pos), X14.12he, color = Num)) + geom_boxplot() + 
+        colScale + ggtitle("Ratio Boxplot") +
         ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
-        theme(axis.title.x = element_blank()) + theme(legend.position="none") +
-        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+        theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12)) 
+        
   
     } else {
       ggplot(z, aes(ts, X14.12he, color = Num)) + geom_point(size=3.5) + 
+        colScale + ggtitle("14/12 Ratio") +
         ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
-        theme(axis.title.x = element_blank()) + theme(legend.position="none") +
+        theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
         theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
       #qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=z)
     }  
@@ -138,6 +150,11 @@ shinyServer(function(input, output, clientData, session) {
   
  
   output$curPlot <- renderPlot({
+    
+    #Create a custom color scale
+    myColors <- brewer.pal(4,"Set1")
+    names(myColors) <- levels(z$Num)
+    colScale <- scale_colour_manual(name = "Num",values = myColors)
     
     z <- wheelData()
     if (input$type == 1) {
@@ -149,14 +166,16 @@ shinyServer(function(input, output, clientData, session) {
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
       ggplot(z, aes(factor(Pos), he12C, color = Num)) + geom_boxplot() + 
+        colScale + ggtitle("12C Boxplot") +
         ylab(expression(paste("He 12C (", mu,"A)"))) +
-        theme(axis.title.x = element_blank()) + theme(legend.position="none") +
+        theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
         theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
       
     } else {
       ggplot(z, aes(ts, he12C, color = Num)) + geom_point(size=3.5) + 
+        colScale + ggtitle("12C Currents") +
         ylab(expression(paste("He 12C (", mu,"A)"))) +
-        theme(axis.title.x = element_blank()) + theme(legend.position="none") +
+        theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
         theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
     }  
     
