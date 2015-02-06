@@ -29,8 +29,17 @@ readCFWheel = function (file) {
   z$X14.12he = z$X14.12he * 1E12
   #Convert current to uA
   z$he12C = z$he12C * 1E6
+  z$le12C = z$le12C * 1E6
   z
 }
+
+format_num <- function(col) {
+  if (is.numeric(col))
+    sprintf('%1.4f', col)
+  else
+    col
+}
+
 
 shinyServer(function(input, output, clientData, session) {
   
@@ -153,6 +162,27 @@ shinyServer(function(input, output, clientData, session) {
     
   })
   
- 
+  # Filter data based on selections
+  output$table <- renderDataTable({
+    
+    z <- wheelData()
+    if (input$type == 1) {
+      z <- z[z$Num == "S",]
+    } else if (input$type == 2) {
+      z <- z[z$Num == "B",]
+    }
+    
+    z$Timestamp <- strftime(z$ts,"%b-%d %H:%M:%S")
+    z0 <- select(z, Timestamp, Pos, Meas, Sample.Name)
+    # Apply the function to each column, and convert the list output back to a data frame
+    z1 <- z %>% select(le12C, he12C, X13.12he, X14.12he) %>% mutate_each(funs(format_num))
+    z <- bind_cols(z0,z1)
+    z
+    }#, options = list(LengthMenu = c(25, 40, 401), pageLength = 40, orderClasses = TRUE,
+    #              autoWidth = TRUE
+                  #columns = list(list(width = "30px", width = "15px",
+                  #                     width = "15px", width = "30px"))
+  #)
+  )
 })
 
