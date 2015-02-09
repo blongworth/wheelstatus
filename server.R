@@ -26,6 +26,9 @@ readCFWheel = function (file) {
   z$ts = as.POSIXct(strptime(z$Run.Completion.Time, format = "%a %b %d %H:%M:%S %y"))
   #Add counting error
   z$ce = 1/sqrt(z$CntTotGT)
+  #Add corrected 14/12
+  z$cor1412he <- z$X14.12he/z$X13.12he^2 * 1E9
+  
   #Convert ratio to 1E12
   z$X14.12he = z$X14.12he * 1E12
   #Convert current to uA
@@ -44,8 +47,8 @@ format_num <- function(col) {
 
 
 shinyServer(function(input, output, clientData, session) {
-  
-  wheelData <- reactive({
+    
+  wheelPath <- reactive({
     
     #get wheels based on system
     if (input$system == 1) {
@@ -62,12 +65,17 @@ shinyServer(function(input, output, clientData, session) {
     updateSelectInput(session, "wheelSelect",
                       choices = wheels,
                       selected = tail(wheels, n = 1))
+  
+    wheelpath
+    
+  })
+  wheelData <- reactive({
     
     #Update on refresh button
-    input$reload
+    input$reload  
     
     #Create the path and load the file
-    file <- paste(wheelpath, input$wheelSelect, sep = "/")
+    file <- paste(wheelPath(), input$wheelSelect, sep = "/")
     readCFWheel(file)
           
   })
@@ -104,6 +112,15 @@ shinyServer(function(input, output, clientData, session) {
     m <- mean(z[z$Num == "S",15]) * 10E-13
     s <- sd(z[z$Num == "S",15]) * 10E-13
     sprintf("Mean of Standards is %.3e SD %.3e", m, s)
+    
+  })
+  
+  output$stdnMean <- renderText({ 
+    
+    z <- wheelData()
+    m <- mean(z[z$Num == "S",18])
+    s <- sd(z[z$Num == "S",18])
+    sprintf("Mean of 13C corrected Standards is %.3f SD %.3f", m, s)
     
   })
   
@@ -150,7 +167,30 @@ shinyServer(function(input, output, clientData, session) {
   
   })
   
- 
+  output$rat13Plot <- renderPlot({
+    
+    #14/12 corrected by 13/12
+    
+    if (input$box == 1) {
+      #try position_dodge to add points to boxplot
+      ggplot(subData(), aes(factor(Pos), cor1412he, color = Num)) + geom_boxplot() + 
+        colScale() + ggtitle("Ratio Boxplot") +
+        ylab(expression(paste("13/12C corrected 14/12C (x", 10^{-12},")"))) +
+        theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12)) 
+      
+      
+    } else {
+      ggplot(subData(), aes(ts, cor1412he, color = Num)) + geom_point(size=3.5) + 
+        colScale() + ggtitle("13/12C corrected 14/12 Ratio") +
+        ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
+        theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+      #qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=z)
+    }  
+    
+  })
+  
   output$curPlot <- renderPlot({
       
     if (input$box == 1) {

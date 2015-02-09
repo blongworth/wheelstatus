@@ -41,9 +41,11 @@ shinyUI(
       mainPanel(
                 
         textOutput("stdMean"),
+        textOutput("stdnMean"),
         textOutput("lastRun"),
         textOutput("endTime"),
         plotOutput("ratPlot"),
+        plotOutput("rat13Plot"),
         plotOutput("curPlot")
       )
     ),
