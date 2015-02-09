@@ -81,6 +81,8 @@ shinyServer(function(input, output, clientData, session) {
       z[z$Num == "S",]
     } else if (input$type == 2) {
       z[z$Num == "B",]
+    } else {
+      z
     }
     
   })  
