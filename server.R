@@ -16,7 +16,7 @@ usamspath = "/mnt/shared/USAMS/Results"
 cfamspath = "/mnt/shared/CFAMS/CFAMS Results"
 #system = 1
 
-#Define functions
+##Define functions
 
 #Function to read a single file into a data frame
 
@@ -34,6 +34,7 @@ readCFWheel = function (file) {
   z
 }
 
+#Function for formatting table
 format_num <- function(col) {
   if (is.numeric(col))
     sprintf('%1.4f', col)
@@ -44,7 +45,7 @@ format_num <- function(col) {
 
 shinyServer(function(input, output, clientData, session) {
   
-  observe({
+  wheelData <- reactive({
     
     #get wheels based on system
     if (input$system == 1) {
@@ -61,24 +62,38 @@ shinyServer(function(input, output, clientData, session) {
     updateSelectInput(session, "wheelSelect",
                       choices = wheels,
                       selected = tail(wheels, n = 1))
-  
-  })
-
-  wheelData <- reactive({
-    #get wheels based on system
-    if (input$system == 1) {
-      wheelpath = usamspath
-    } else if (input$system == 2) {
-      wheelpath = cfamspath
-    } else {
-      #Stop
-    }
     
+    #Update on refresh button
     input$reload
     
+    #Create the path and load the file
     file <- paste(wheelpath, input$wheelSelect, sep = "/")
     readCFWheel(file)
           
+  })
+  
+  subData <- reactive({
+    
+    z <- wheelData()
+    
+    #Subset based on input
+    if (input$type == 1) {
+      z[z$Num == "S",]
+    } else if (input$type == 2) {
+      z[z$Num == "B",]
+    }
+    
+  })  
+  
+  colScale <- reactive({
+    
+    z <- wheelData()
+    
+    #Create a custom color scale
+    myColors <- brewer.pal(4,"Set1")
+    names(myColors) <- levels(z$Num)
+    scale_colour_manual(name = "Num",values = myColors)
+    
   })
   
   output$stdMean <- renderText({ 
@@ -113,33 +128,18 @@ shinyServer(function(input, output, clientData, session) {
   
   output$ratPlot <- renderPlot({
     
-    
-    z <- wheelData()
-    
-    #Create a custom color scale
-    myColors <- brewer.pal(4,"Set1")
-    names(myColors) <- levels(z$Num)
-    colScale <- scale_colour_manual(name = "Num",values = myColors)
-    
-    #Subset based on input
-    if (input$type == 1) {
-      z <- z[z$Num == "S",]
-    } else if (input$type == 2) {
-      z <- z[z$Num == "B",]
-    }
-    
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
-      ggplot(z, aes(factor(Pos), X14.12he, color = Num)) + geom_boxplot() + 
-        colScale + ggtitle("Ratio Boxplot") +
+      ggplot(subData(), aes(factor(Pos), X14.12he, color = Num)) + geom_boxplot() + 
+        colScale() + ggtitle("Ratio Boxplot") +
         ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
         theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
         theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12)) 
         
   
     } else {
-      ggplot(z, aes(ts, X14.12he, color = Num)) + geom_point(size=3.5) + 
-        colScale + ggtitle("14/12 Ratio") +
+      ggplot(subData(), aes(ts, X14.12he, color = Num)) + geom_point(size=3.5) + 
+        colScale() + ggtitle("14/12 Ratio") +
         ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
         theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
         theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
@@ -150,30 +150,18 @@ shinyServer(function(input, output, clientData, session) {
   
  
   output$curPlot <- renderPlot({
-    
-    #Create a custom color scale
-    myColors <- brewer.pal(4,"Set1")
-    names(myColors) <- levels(z$Num)
-    colScale <- scale_colour_manual(name = "Num",values = myColors)
-    
-    z <- wheelData()
-    if (input$type == 1) {
-      z <- z[z$Num == "S",]
-    } else if (input$type == 2) {
-      z <- z[z$Num == "B",]
-    }
-    
+      
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
-      ggplot(z, aes(factor(Pos), he12C, color = Num)) + geom_boxplot() + 
-        colScale + ggtitle("12C Boxplot") +
+      ggplot(subData(), aes(factor(Pos), he12C, color = Num)) + geom_boxplot() + 
+        colScale() + ggtitle("12C Boxplot") +
         ylab(expression(paste("He 12C (", mu,"A)"))) +
         theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
         theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
       
     } else {
-      ggplot(z, aes(ts, he12C, color = Num)) + geom_point(size=3.5) + 
-        colScale + ggtitle("12C Currents") +
+      ggplot(subData(), aes(ts, he12C, color = Num)) + geom_point(size=3.5) + 
+        colScale() + ggtitle("12C Currents") +
         ylab(expression(paste("He 12C (", mu,"A)"))) +
         theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
         theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
@@ -184,19 +172,17 @@ shinyServer(function(input, output, clientData, session) {
   # Filter data based on selections
   output$table <- renderDataTable({
     
-    z <- wheelData()
-    if (input$type == 1) {
-      z <- z[z$Num == "S",]
-    } else if (input$type == 2) {
-      z <- z[z$Num == "B",]
-    }
     
+    z <- subData()
+    
+    #Format for table output
     z$Timestamp <- strftime(z$ts,"%b-%d %H:%M:%S")
     z0 <- select(z, Timestamp, Pos, Meas, Sample.Name)
+    
     # Apply the function to each column, and convert the list output back to a data frame
     z1 <- z %>% select(le12C, he12C, X13.12he, X14.12he) %>% mutate_each(funs(format_num))
-    z <- bind_cols(z0,z1)
-    z
+    bind_cols(z0,z1)
+    
     }#, options = list(LengthMenu = c(25, 40, 401), pageLength = 40, orderClasses = TRUE,
     #              autoWidth = TRUE
                   #columns = list(list(width = "30px", width = "15px",
