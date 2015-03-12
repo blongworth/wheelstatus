@@ -77,7 +77,7 @@ shinyServer(function(input, output, clientData, session) {
     #Create the path and load the file
     file <- paste(wheelPath(), input$wheelSelect, sep = "/")
     readCFWheel(file)
-          
+    
   })
   
   subData <- reactive({
@@ -100,7 +100,7 @@ shinyServer(function(input, output, clientData, session) {
     z <- wheelData()
     
     #Create a custom color scale
-    myColors <- brewer.pal(4,"Set1")
+    myColors <- brewer.pal(length(levels(z$Num)),"Set1")
     names(myColors) <- levels(z$Num)
     scale_colour_manual(name = "Num",values = myColors)
     
@@ -174,8 +174,8 @@ shinyServer(function(input, output, clientData, session) {
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
       ggplot(subData(), aes(factor(Pos), cor1412he, color = Num)) + geom_boxplot() + 
-        colScale() + ggtitle("Ratio Boxplot") +
-        ylab(expression(paste("13/12C corrected 14/12C (x", 10^{-12},")"))) +
+        colScale() + ggtitle("13/12C corrected 14/12 Ratio") +
+        ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
         theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
         theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12)) 
       
@@ -183,7 +183,7 @@ shinyServer(function(input, output, clientData, session) {
     } else {
       ggplot(subData(), aes(ts, cor1412he, color = Num)) + geom_point(size=3.5) + 
         colScale() + ggtitle("13/12C corrected 14/12 Ratio") +
-        ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
+        ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
         theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
         theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
       #qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=z)
@@ -211,6 +211,17 @@ shinyServer(function(input, output, clientData, session) {
     
   })
   
+  output$curratPlot <- renderPlot({
+    
+      ggplot(subData(), aes(he12C, cor1412he, color = Num)) + geom_point(size=3.5) + 
+        colScale() + ggtitle("Ratio vs Current") +
+        xlab(expression(paste("He 12C (", mu,"A)"))) +
+        ylab(expression(paste("13C corrected 14/12C (x", 10^{-12},")"))) +
+        theme(axis.title.x = element_text(size=16), axis.text.x  = element_text(size=12)) +
+        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+     
+    
+  })
   # Filter data based on selections
   output$table <- renderDataTable({
     

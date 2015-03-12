@@ -46,7 +46,8 @@ shinyUI(
         textOutput("endTime"),
         plotOutput("ratPlot"),
         plotOutput("rat13Plot"),
-        plotOutput("curPlot")
+        plotOutput("curPlot"),
+        plotOutput("curratPlot")
       )
     ),
     
