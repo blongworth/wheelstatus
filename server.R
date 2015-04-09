@@ -60,6 +60,9 @@ shinyServer(function(input, output, clientData, session) {
     }
     
     wheels <- list.files(path = wheelpath, pattern = "*AMS*.*")
+    details <- file.info(wheels)
+    details = details[with(details, order(as.POSIXct(mtime))), ]
+    wheels = rownames(details)
     
     # Change values for input$wheelSelect
     updateSelectInput(session, "wheelSelect",
@@ -111,7 +114,8 @@ shinyServer(function(input, output, clientData, session) {
     z <- wheelData()
     m <- mean(z[z$Num == "S",15]) * 10E-13
     s <- sd(z[z$Num == "S",15]) * 10E-13
-    sprintf("Mean of Standards is %.3e SD %.3e", m, s)
+    rs <- s/m
+    sprintf("Mean of Standards is %.3e SD %.3e (RSD %.4f)", m, s, rs)
     
   })
   
@@ -120,7 +124,8 @@ shinyServer(function(input, output, clientData, session) {
     z <- wheelData()
     m <- mean(z[z$Num == "S",18])
     s <- sd(z[z$Num == "S",18])
-    sprintf("Mean of 13C corrected Standards is %.3f SD %.3f", m, s)
+    rs <- s/m
+    sprintf("Mean of 13C corrected Standards is %.3e SD %.3e (RSD %.4f)", m, s, rs)
     
   })
   
