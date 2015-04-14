@@ -47,20 +47,10 @@ format_num <- function(col) {
 
 
 shinyServer(function(input, output, clientData, session) {
-    
-  wheelPath <- reactive({
-    
-    #get wheels based on system
-    if (input$system == 1) {
-      wheelpath = usamspath
-    } else if (input$system == 2) {
-      wheelpath = cfamspath
-    } else {
-      #Stop
-    }
-    
+        
+  observe({
     #Get and order wheelnames
-    details <- file.info(list.files(path = wheelpath, pattern = "*AMS*.*", full.names=TRUE))
+    details <- file.info(list.files(path = input$system, pattern = "*AMS*.*", full.names=TRUE))
     details <- details[with(details, order(as.POSIXct(mtime))), ]
     wheels <- basename(rownames(details))
     
@@ -68,8 +58,6 @@ shinyServer(function(input, output, clientData, session) {
     updateSelectInput(session, "wheelSelect",
                       choices = wheels,
                       selected = tail(wheels, n = 1))
-  
-    wheelpath
     
   })
 
@@ -82,13 +70,13 @@ shinyServer(function(input, output, clientData, session) {
     invalidateLater(300000, session)
         
     #Create the path and load the file
-    file <- paste(wheelPath(), input$wheelSelect, sep = "/")
+    file <- paste(input$system, input$wheelSelect, sep = "/")
     readCFWheel(file)
     
   })
   
   #Code to reload wheel when file changes
-  #wheelData <- reactiveFileReader(1000, session, paste(wheelPath(), input$wheelSelect, sep = "/"), readCFWheel)
+  #wheelData <- reactiveFileReader(1000, session, paste(input$system, input$wheelSelect, sep = "/"), readCFWheel)
   
   subData <- reactive({
     

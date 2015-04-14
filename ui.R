@@ -6,6 +6,8 @@
 #
 
 library(shiny)
+usamspath = "/mnt/shared/USAMS/Results"
+cfamspath = "/mnt/shared/CFAMS/CFAMS Results"
 
 
 shinyUI(
@@ -19,8 +21,8 @@ shinyUI(
       sidebarPanel(
         
         radioButtons("system", label = h3("System"),
-                     choices = list("USAMS" = 1, "CFAMS" = 2),
-                     selected = 1),
+                     choices = list("USAMS" = usamspath, "CFAMS" = cfamspath),
+                     selected = usamspath),
         selectInput("wheelSelect",
                     label = h3("Wheel"),
                     c("label 1" = "option1")),
