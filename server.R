@@ -59,10 +59,10 @@ shinyServer(function(input, output, clientData, session) {
       #Stop
     }
     
-    wheels <- list.files(path = wheelpath, pattern = "*AMS*.*")
-    details <- file.info(wheels)
-    details = details[with(details, order(as.POSIXct(mtime))), ]
-    wheels = rownames(details)
+    #Get and order wheelnames
+    details <- file.info(list.files(path = wheelpath, pattern = "*AMS*.*", full.names=TRUE))
+    details <- details[with(details, order(as.POSIXct(mtime))), ]
+    wheels <- basename(rownames(details))
     
     # Change values for input$wheelSelect
     updateSelectInput(session, "wheelSelect",
@@ -72,6 +72,7 @@ shinyServer(function(input, output, clientData, session) {
     wheelpath
     
   })
+
   wheelData <- reactive({
     
     #Update on refresh button
@@ -79,16 +80,16 @@ shinyServer(function(input, output, clientData, session) {
     
     #Update every 5 minutes
     invalidateLater(300000, session)
-    
-    #Code to reload wheel when file changes
-    #wheelData <- reactiveFileReader(1000, session, paste(wheelPath(), input$wheelSelect, sep = "/"), readCFWheel)
-    
+        
     #Create the path and load the file
     file <- paste(wheelPath(), input$wheelSelect, sep = "/")
     readCFWheel(file)
     
   })
-    
+  
+  #Code to reload wheel when file changes
+  #wheelData <- reactiveFileReader(1000, session, paste(wheelPath(), input$wheelSelect, sep = "/"), readCFWheel)
+  
   subData <- reactive({
     
     z <- wheelData()

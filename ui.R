@@ -23,8 +23,7 @@ shinyUI(
                      selected = 1),
         selectInput("wheelSelect",
                     label = h3("Wheel"),
-                    c("label 1" = "option1",
-                      "label 2" = "option2")),
+                    c("label 1" = "option1")),
                     
         radioButtons("type", label = h3("Sample type"),
                      choices = list("Standards" = 1, "Blanks" = 2, "All samples" = 3),
