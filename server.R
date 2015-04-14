@@ -77,12 +77,18 @@ shinyServer(function(input, output, clientData, session) {
     #Update on refresh button
     input$reload  
     
+    #Update every 5 minutes
+    invalidateLater(300000, session)
+    
+    #Code to reload wheel when file changes
+    #wheelData <- reactiveFileReader(1000, session, paste(wheelPath(), input$wheelSelect, sep = "/"), readCFWheel)
+    
     #Create the path and load the file
     file <- paste(wheelPath(), input$wheelSelect, sep = "/")
     readCFWheel(file)
     
   })
-  
+    
   subData <- reactive({
     
     z <- wheelData()
