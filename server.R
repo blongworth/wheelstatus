@@ -79,6 +79,12 @@ shinyServer(function(input, output, clientData, session) {
   
   wheelData <- reactive({
     
+    validate(
+      need(file.exists(
+        paste(input$system, input$wheelSelect, sep = "/")),
+        message=FALSE)
+    )
+    
     #Code to reload wheel when file changes
     wheelFile <- reactiveFileReader(1000, session, paste(input$system, input$wheelSelect, sep = "/"), read.delim, skip = 4, comment.char = "=")
     z <- wheelFile()
