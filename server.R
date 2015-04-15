@@ -133,19 +133,29 @@ shinyServer(function(input, output, clientData, session) {
     lt <- tail(z$Run.Completion.Time, n = 1)
     lr <- paste("Last run was ", lt)
     
-    #time remaining
-    l <- tail(z, n = 1)
-    #Need to calculate runs based on runlist for CFAMS
-    r <- 401 - 40 * (l$Meas - 1) - l$Pos #runs remaining
-    t <- r * 180 #seconds remaining
-    h <- seconds_to_period(t)
-    if (r <= 0) {
+    #skip time calculations for cfams
+    if (input$system == "/mnt/shared/USAMS/Results") {
+    
+      #time remaining
+      l <- tail(z, n = 1)
+      #Need to calculate runs based on runlist for CFAMS
+      r <- 401 - 40 * (l$Meas - 1) - l$Pos #runs remaining
+      t <- r * 180 #seconds remaining
+      h <- seconds_to_period(t)
+      
+      if (r <= 0) {
+        rl <- "Run is finished"
+        re <- ""
+      } else {
+        rl <- paste(r, "runs to go, which will take about", h)
+        re <- paste("The run should end around", Sys.time() + t)
+      }
+      
+    } else {
       rl <- "Run is finished"
       re <- ""
-    } else {
-      rl <- paste(r, "runs to go, which will take about", h)
-      re <- paste("The run should end around", Sys.time() + t)
     }
+    
     HTML(paste(s, c, lr, rl, re, sep = '<br/>'))
     
   })
