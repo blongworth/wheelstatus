@@ -34,15 +34,10 @@ shinyUI(
         checkboxInput("box", label = "Boxplot?", value = FALSE)
         
       ),
-        
   
       # Stats and Plots
       mainPanel(
-                
-        textOutput("stdMean"),
-        textOutput("stdnMean"),
-        textOutput("lastRun"),
-        textOutput("endTime"),
+        htmlOutput("stdData"),
         plotOutput("ratPlot"),
         plotOutput("rat13Plot"),
         plotOutput("curPlot"),

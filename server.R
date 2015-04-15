@@ -112,44 +112,35 @@ shinyServer(function(input, output, clientData, session) {
     
   })
   
-  output$stdMean <- renderText({ 
+  #run statistics
+  output$stdData <- renderUI({ 
     
     z <- wheelData()
-    m <- mean(z[z$Num == "S",15]) * 10E-13
-    s <- sd(z[z$Num == "S",15]) * 10E-13
-    rs <- s/m
-    sprintf("Mean of Standards is %.3e SD %.3e (RSD %.4f)", m, s, rs)
     
-  })
-  
-  output$stdnMean <- renderText({ 
+    #raw ratio
+    s.m <- mean(z[z$Num == "S",15]) * 10E-13
+    s.s <- sd(z[z$Num == "S",15]) * 10E-13
+    s.rs <- s.s/s.m
+    s <- sprintf("Mean of Standards is %.3e SD %.3e (RSD %.4f)", s.m, s.s, s.rs)
     
-    z <- wheelData()
-    m <- mean(z[z$Num == "S",18])
-    s <- sd(z[z$Num == "S",18])
-    rs <- s/m
-    sprintf("Mean of 13C corrected Standards is %.3e SD %.3e (RSD %.4f)", m, s, rs)
+    #13C norm ratio
+    c.m <- mean(z[z$Num == "S",18])
+    c.s <- sd(z[z$Num == "S",18])
+    c.rs <- c.s/c.m
+    c <- sprintf("Mean of 13C corrected Standards is %.3e SD %.3e (RSD %.4f)", c.m, c.s, c.rs)
     
-  })
-  
-  output$lastRun <- renderText({ 
+    #last run
+    lt <- tail(z$Run.Completion.Time, n = 1)
+    lr <- paste("Last run was ", lt)
     
-    z <- wheelData()
-    l <- tail(z$Run.Completion.Time, n = 1)
-    
-    paste("Last run was ", l)
-    
-  })
-  
-  output$endTime <- renderText({ 
-    
-    z <- wheelData()
+    #time remaining
     l <- tail(z, n = 1)
     r <- 401 - 40 * (l$Meas - 1) - l$Pos
     t <- r * 180
     h <- t / 3600
+    rl <- sprintf("%d runs to go, which will take about %.1f hours", r, h)
     
-    sprintf("%d runs to go, which will take about %.1f hours", r, h)
+    HTML(paste(s, c, lr, rl, sep = '<br/>'))
     
   })
   
