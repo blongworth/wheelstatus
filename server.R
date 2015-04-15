@@ -37,6 +37,23 @@ readCFWheel = function (file) {
   z
 }
 
+mungeCFWheel = function (z) {
+  
+  #Fix timestamp
+  z$ts = as.POSIXct(strptime(z$Run.Completion.Time, format = "%a %b %d %H:%M:%S %y"))
+  #Add counting error
+  z$ce = 1/sqrt(z$CntTotGT)
+  #Add corrected 14/12
+  z$cor1412he <- z$X14.12he/z$X13.12he^2 * 1E9
+  
+  #Convert ratio to 1E12
+  z$X14.12he = z$X14.12he * 1E12
+  #Convert current to uA
+  z$he12C = z$he12C * 1E6
+  z$le12C = z$le12C * 1E6
+  z
+}
+
 #Function for formatting table
 format_num <- function(col) {
   if (is.numeric(col))
@@ -44,7 +61,6 @@ format_num <- function(col) {
   else
     col
 }
-
 
 shinyServer(function(input, output, clientData, session) {
         
@@ -60,24 +76,16 @@ shinyServer(function(input, output, clientData, session) {
                       selected = tail(wheels, n = 1))
     
   })
-
+  
   wheelData <- reactive({
     
-    #Update on refresh button
-    input$reload  
-    
-    #Update every 5 minutes
-    invalidateLater(300000, session)
-        
-    #Create the path and load the file
-    file <- paste(input$system, input$wheelSelect, sep = "/")
-    readCFWheel(file)
-    
-  })
+    #Code to reload wheel when file changes
+    wheelFile <- reactiveFileReader(1000, session, paste(input$system, input$wheelSelect, sep = "/"), read.delim, skip = 4, comment.char = "=")
+    z <- wheelFile()
+    mungeCFWheel(z)
   
-  #Code to reload wheel when file changes
-  #wheelData <- reactiveFileReader(1000, session, paste(input$system, input$wheelSelect, sep = "/"), readCFWheel)
-  
+    })
+
   subData <- reactive({
     
     z <- wheelData()

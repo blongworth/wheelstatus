@@ -16,7 +16,7 @@ shinyUI(
     # Application title
     titlePanel("NOSAMS Wheel Status"),
   
-    # Sidebar with a slider input for number of bins
+    # Sidebar with inputs for selecting wheel and display style
     sidebarLayout(
       sidebarPanel(
         
@@ -31,14 +31,12 @@ shinyUI(
                      choices = list("Standards" = 1, "Blanks" = 2, "All samples" = 3),
                      selected = 1),
         
-        checkboxInput("box", label = "Boxplot?", value = FALSE),
-        
-        actionButton("reload", "Refresh Data")
+        checkboxInput("box", label = "Boxplot?", value = FALSE)
         
       ),
         
   
-      # Show a plot of the generated distribution
+      # Stats and Plots
       mainPanel(
                 
         textOutput("stdMean"),
@@ -53,6 +51,7 @@ shinyUI(
     ),
     
     fluidRow(
+      #Data table
       dataTableOutput(outputId="table")
     )
   
