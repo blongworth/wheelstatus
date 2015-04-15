@@ -10,7 +10,7 @@ library(ggplot2)
 #library(plotly)
 library(dplyr)
 library(RColorBrewer)
-
+library(lubridate)
 
 usamspath = "/mnt/shared/USAMS/Results"
 cfamspath = "/mnt/shared/CFAMS/CFAMS Results"
@@ -135,12 +135,18 @@ shinyServer(function(input, output, clientData, session) {
     
     #time remaining
     l <- tail(z, n = 1)
-    r <- 401 - 40 * (l$Meas - 1) - l$Pos
-    t <- r * 180
-    h <- t / 3600
-    rl <- sprintf("%d runs to go, which will take about %.1f hours", r, h)
-    
-    HTML(paste(s, c, lr, rl, sep = '<br/>'))
+    #Need to calculate runs based on runlist for CFAMS
+    r <- 401 - 40 * (l$Meas - 1) - l$Pos #runs remaining
+    t <- r * 180 #seconds remaining
+    h <- seconds_to_period(t)
+    if (r <= 0) {
+      rl <- "Run is finished"
+      re <- ""
+    } else {
+      rl <- paste(r, "runs to go, which will take about", h)
+      re <- paste("The run should end around", Sys.time() + t)
+    }
+    HTML(paste(s, c, lr, rl, re, sep = '<br/>'))
     
   })
   
