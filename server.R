@@ -65,7 +65,8 @@ format_num <- function(col) {
 shinyServer(function(input, output, clientData, session) {
         
   observe({
-    #Get and order wheelnames
+    
+    #Get and order wheelnames by system
     details <- file.info(list.files(path = input$system, pattern = "*AMS*.*", full.names=TRUE))
     details <- details[with(details, order(as.POSIXct(mtime))), ]
     wheels <- basename(rownames(details))
@@ -79,18 +80,17 @@ shinyServer(function(input, output, clientData, session) {
   
   wheelData <- reactive({
     
-    validate(
-      need(file.exists(
-        paste(input$system, input$wheelSelect, sep = "/")),
-        message=FALSE)
-    )
+    wheelfile <- paste(input$system, input$wheelSelect, sep = "/")
+    
+    #Check that we've selected a valid file
+    validate(need(file.exists(wheelfile), message=FALSE))
     
     #Code to reload wheel when file changes
-    wheelFile <- reactiveFileReader(1000, session, paste(input$system, input$wheelSelect, sep = "/"), read.delim, skip = 4, comment.char = "=")
-    z <- wheelFile()
+    file <- reactiveFileReader(5000, session, wheelfile, read.delim, skip = 4, comment.char = "=")
+    z <- file()
     mungeCFWheel(z)
-  
-    })
+    
+  })
 
   subData <- reactive({
     
@@ -170,22 +170,27 @@ shinyServer(function(input, output, clientData, session) {
     
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
-      ggplot(subData(), aes(factor(Pos), X14.12he, color = Num)) + geom_boxplot() + 
+      ggplot(subData(), aes(factor(Pos), X14.12he, color = Num)) + 
+        geom_boxplot() + 
         colScale() + ggtitle("Ratio Boxplot") +
         ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
-        theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
-        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12)) 
-        
-  
+        theme(axis.title.x = element_blank()) + 
+        #theme(legend.position="none") +
+        theme(axis.title.y = element_text(size=16), 
+              axis.text.y  = element_text(size=12)) 
+      
+      
     } else {
-      ggplot(subData(), aes(ts, X14.12he, color = Num)) + geom_point(size=3.5) + 
+      ggplot(subData(), aes(ts, X14.12he, color = Num)) + 
+        geom_point(size=3.5) + 
         colScale() + ggtitle("14/12 Ratio") +
         ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
         theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
-        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+        theme(axis.title.y = element_text(size=16), 
+              axis.text.y  = element_text(size=12))
       #qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=z)
     }  
-  
+    
   })
   
   output$rat13Plot <- renderPlot({
@@ -243,10 +248,8 @@ shinyServer(function(input, output, clientData, session) {
      
     
   })
-  # Filter data based on selections
-  output$table <- renderDataTable({
-    
-    
+  
+  tableData <- reactive({
     z <- subData()
     
     #Format for table output
@@ -254,14 +257,24 @@ shinyServer(function(input, output, clientData, session) {
     z0 <- select(z, Timestamp, Pos, Meas, Sample.Name)
     
     # Apply the function to each column, and convert the list output back to a data frame
-    z1 <- z %>% select(le12C, he12C, X13.12he, X14.12he) %>% mutate_each(funs(format_num))
-    bind_cols(z0,z1)
+    z1 <- z %>% 
+      select(le12C, he12C, X13.12he, X14.12he) %>% 
+      mutate(X13.12he = X13.12he*100) %>%
+      mutate_each(funs(format_num)) 
     
-    }#, options = list(LengthMenu = c(25, 40, 401), pageLength = 40, orderClasses = TRUE,
-    #              autoWidth = TRUE
-                  #columns = list(list(width = "30px", width = "15px",
-                  #                     width = "15px", width = "30px"))
-  #)
-  )
+    t <- bind_cols(z0,z1)
+    colnames(t) <- c("Timestamp", "Position", "Measurement", "Name",
+                     "LE 12C (uA)", "HE 12C (uA)", "HE 13/12C (x10E-2)",
+                     "HE 14/12C (x10E-12)") 
+    
+    return(t)
+    
+  })
+  
+  
+  output$table <- renderDataTable(tableData())
+    
+
+  
 })
 
