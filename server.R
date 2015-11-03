@@ -18,41 +18,27 @@ cfamspath = "/mnt/shared/CFAMS/CFAMS Results"
 
 ##Define functions
 
-#Function to read a single file into a data frame
 
-readCFWheel = function (file) {
-  z <- read.delim(file, skip = 4, comment.char = "=")
-  #Fix timestamp
-  z$ts = as.POSIXct(strptime(z$Run.Completion.Time, format = "%a %b %d %H:%M:%S %y"))
-  #Add counting error
-  z$ce = 1/sqrt(z$CntTotGT)
-  #Add corrected 14/12
-  z$cor1412he <- z$X14.12he/z$X13.12he^2 * 1E9
-  
-  #Convert ratio to 1E12
-  z$X14.12he = z$X14.12he * 1E12
-  #Convert current to uA
-  z$he12C = z$he12C * 1E6
-  z$le12C = z$le12C * 1E6
-  z
-}
-
+#Massage wheel data
 mungeCFWheel = function (z) {
   
-  #Fix timestamp
-  z$ts = as.POSIXct(strptime(z$Run.Completion.Time, format = "%a %b %d %H:%M:%S %y"))
-  #Add counting error
-  z$ce = 1/sqrt(z$CntTotGT)
-  #Add corrected 14/12
-  z$cor1412he <- z$X14.12he/z$X13.12he^2 * 1E9
+  z %>% mutate(ts = as.POSIXct(strptime(
+                  Run.Completion.Time, format = "%a %b %d %H:%M:%S %y")), 
+               ce = 1/sqrt(CntTotGT), #Add counting error
+               cor1412he = X14.12he/X13.12he^2 * 1E9, #Add corrected 14/12
+               X14.12he = X14.12he * 1E12, #Convert ratio to 1E12
+               he12C = he12C * 1E6, #Convert current to uA
+               le12C = le12C * 1E6)
   
-  #Convert ratio to 1E12
-  z$X14.12he = z$X14.12he * 1E12
-  #Convert current to uA
-  z$he12C = z$he12C * 1E6
-  z$le12C = z$le12C * 1E6
-  z
 }
+
+#Function to read a single file into a data frame
+readCFWheel = function (file) {
+  z <- read.delim(file, skip = 4, comment.char = "=")
+  mungeCFWheel(z)
+}
+
+
 
 #Function for formatting table
 format_num <- function(col) {
@@ -98,9 +84,11 @@ shinyServer(function(input, output, clientData, session) {
     
     #Subset based on input
     if (input$type == 1) {
-      z[z$Num == "S",]
+      #z[z$Num == "S",]
+      filter(z, Num == "S")
     } else if (input$type == 2) {
-      z[z$Num == "B",]
+      #z[z$Num == "B",]
+      filter(z, Num == "B")
     } else {
       z
     }
