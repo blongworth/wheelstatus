@@ -84,10 +84,8 @@ shinyServer(function(input, output, clientData, session) {
     
     #Subset based on input
     if (input$type == 1) {
-      #z[z$Num == "S",]
       filter(z, Num == "S")
     } else if (input$type == 2) {
-      #z[z$Num == "B",]
       filter(z, Num == "B")
     } else {
       z
@@ -238,31 +236,23 @@ shinyServer(function(input, output, clientData, session) {
   })
   
   tableData <- reactive({
-    z <- subData()
-    
-    #Format for table output
-    z$Timestamp <- strftime(z$ts,"%b-%d %H:%M:%S")
-    z0 <- select(z, Timestamp, Pos, Meas, Sample.Name)
-    
-    # Apply the function to each column, and convert the list output back to a data frame
-    z1 <- z %>% 
-      select(le12C, he12C, X13.12he, X14.12he) %>% 
-      mutate(X13.12he = X13.12he*100) %>%
-      mutate_each(funs(format_num)) 
-    
-    t <- bind_cols(z0,z1)
-    colnames(t) <- c("Timestamp", "Position", "Measurement", "Name",
-                     "LE 12C (uA)", "HE 12C (uA)", "HE 13/12C (x10E-2)",
-                     "HE 14/12C (x10E-12)") 
-    
-    return(t)
-    
+
+    subData() %>% mutate(Timestamp = strftime(ts,"%b-%d %H:%M:%S"),
+                         X13.12he = X13.12he*100,
+                         `LE12C (uA)` = format_num(le12C),
+                         `HE12C (uA)` = format_num(he12C),
+                         `HE13/12C (x10E-2)` = format_num(X13.12he),
+                         `HE14/12C (x10E-12)` = format_num(X14.12he)) %>%
+                  select(Timestamp, Position = Pos, Measurement = Meas,
+                         Name = Sample.Name, `LE12C (uA)`,
+                         `HE12C (uA)`, `HE13/12C (x10E-2)`,
+                         `HE14/12C (x10E-12)`) 
+      
   })
   
   
   output$table <- renderDataTable(tableData())
     
-
   
 })
 
