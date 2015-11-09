@@ -119,11 +119,12 @@ shinyServer(function(input, output, clientData, session) {
     c.m <- mean(z[z$Num == "S",18])
     c.s <- sd(z[z$Num == "S",18])
     c.rs <- c.s/c.m
-    c <- sprintf("Mean of 13C corrected Standards is %.3e SD %.3e (RSD %.4f)", c.m, c.s, c.rs)
+    c <- sprintf("Mean of 13C corrected standards is %.3e SD %.3e (RSD %.4f)", c.m, c.s, c.rs)
     
     #last run
     lt <- tail(z$Run.Completion.Time, n = 1)
-    lr <- paste("Last run was ", lt)
+    lp <- tail(z$Pos, n = 1)
+    lr <- paste("Last run was position", lp, "at", lt)
     
     #skip time calculations for cfams
     if (input$system == "/mnt/shared/USAMS/Results") {
@@ -136,7 +137,7 @@ shinyServer(function(input, output, clientData, session) {
       h <- seconds_to_period(t)
       
       if (r <= 0) {
-        rl <- "Run is finished"
+        rl <- paste("Run finished:", lt)
         re <- ""
       } else {
         rl <- paste(r, "runs to go, which will take about", h)
@@ -144,7 +145,7 @@ shinyServer(function(input, output, clientData, session) {
       }
       
     } else {
-      rl <- "Run is finished"
+      rl <- ""
       re <- ""
     }
     
