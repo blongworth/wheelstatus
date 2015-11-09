@@ -164,17 +164,24 @@ shinyServer(function(input, output, clientData, session) {
         #theme(legend.position="none") +
         theme(axis.title.y = element_text(size=16), 
               axis.text.y  = element_text(size=12)) 
-      
-      
     } else {
-      ggplot(subData(), aes(ts, X14.12he, color = Num)) + 
+      if (input$type == 1) {
+        ggplot(subData(), aes(ts, X14.12he, color=as.factor(Pos))) + 
         geom_point(size=3.5) + 
-        colScale() + ggtitle("14/12 Ratio") +
+        ggtitle("14/12 Ratio") +
         ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
         theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
         theme(axis.title.y = element_text(size=16), 
               axis.text.y  = element_text(size=12))
-      #qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=z)
+      } else {
+        ggplot(subData(), aes(ts, X14.12he, color = Num)) + 
+          geom_point(size=3.5) + 
+          colScale() + ggtitle("14/12 Ratio") +
+          ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
+          theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+          theme(axis.title.y = element_text(size=16), 
+                axis.text.y  = element_text(size=12))
+      }  
     }  
     
   })
@@ -190,15 +197,20 @@ shinyServer(function(input, output, clientData, session) {
         ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
         theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
         theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12)) 
-      
-      
     } else {
-      ggplot(subData(), aes(ts, cor1412he, color = Num)) + geom_point(size=3.5) + 
-        colScale() + ggtitle("13/12C corrected 14/12 Ratio") +
-        ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
-        theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
-        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
-      #qplot(ts, X14.12he, color=as.factor(Pos), size = 4, data=z)
+      if (input$type == 1) {
+        ggplot(subData(), aes(ts, cor1412he, color = as.factor(Pos))) + geom_point(size=3.5) + 
+          ggtitle("13/12C corrected 14/12 Ratio") +
+          ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
+          theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+          theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+      } else {
+        ggplot(subData(), aes(ts, cor1412he, color = Num)) + geom_point(size=3.5) + 
+          colScale() + ggtitle("13/12C corrected 14/12 Ratio") +
+          ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
+          theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+          theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+      }
     }  
     
   })
