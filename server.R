@@ -18,10 +18,8 @@ cfamspath = "/mnt/shared/CFAMS/CFAMS Results"
 
 ##Define functions
 
-
 #Massage wheel data
 mungeCFWheel = function (z) {
-  
   z %>% mutate(ts = as.POSIXct(strptime(
                   Run.Completion.Time, format = "%a %b %d %H:%M:%S %y")), 
                ce = 1/sqrt(CntTotGT), #Add counting error
@@ -29,7 +27,6 @@ mungeCFWheel = function (z) {
                X14.12he = X14.12he * 1E12, #Convert ratio to 1E12
                he12C = he12C * 1E6, #Convert current to uA
                le12C = le12C * 1E6)
-  
 }
 
 #Function to read a single file into a data frame
@@ -38,7 +35,8 @@ readCFWheel = function (file) {
   mungeCFWheel(z)
 }
 
-
+#relative sd
+rsd <- function(x) {sd(x)/mean(x)}
 
 #Function for formatting table
 format_num <- function(col) {
@@ -47,6 +45,7 @@ format_num <- function(col) {
   else
     col
 }
+
 
 shinyServer(function(input, output, clientData, session) {
         
@@ -109,17 +108,14 @@ shinyServer(function(input, output, clientData, session) {
     
     z <- wheelData()
     
-    #raw ratio
-    s.m <- mean(z[z$Num == "S",15]) * 10E-13
-    s.s <- sd(z[z$Num == "S",15]) * 10E-13
-    s.rs <- s.s/s.m
-    s <- sprintf("Mean of Standards is %.3e SD %.3e (RSD %.4f)", s.m, s.s, s.rs)
+    sum <- z %>% filter(Num == "S") %>% 
+      select(X14.12he, cor1412he) %>% 
+      summarise_each(funs(mean, sd, rsd)) 
     
-    #13C norm ratio
-    c.m <- mean(z[z$Num == "S",18])
-    c.s <- sd(z[z$Num == "S",18])
-    c.rs <- c.s/c.m
-    c <- sprintf("Mean of 13C corrected standards is %.3e SD %.3e (RSD %.4f)", c.m, c.s, c.rs)
+    s <- sprintf("Mean of Standards is %.3f SD %.3f (RSD %.3f)", 
+                 sum$X14.12he_mean, sum$X14.12he_sd, sum$X14.12he_rsd)
+    c <- sprintf("Mean of 13C corrected standards is %.3f SD %.3f (RSD %.3f)", 
+                 sum$cor1412he_mean, sum$cor1412he_sd, sum$cor1412he_rsd)
     
     #last run
     lt <- tail(z$Run.Completion.Time, n = 1)
