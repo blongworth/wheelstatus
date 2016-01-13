@@ -152,7 +152,6 @@ shinyServer(function(input, output, clientData, session) {
   })
   
   output$ratPlot <- renderPlot({
-    
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
       ggplot(subData(), aes(factor(Pos), X14.12he, color = Num)) + 
@@ -165,7 +164,7 @@ shinyServer(function(input, output, clientData, session) {
               axis.text.y  = element_text(size=12)) 
     } else {
       if (input$type == 1) {
-        ggplot(subData(), aes(ts, X14.12he, color=as.factor(Pos))) + 
+        ggplot(subData(), aes(ts, X14.12he, color=Pos)) + 
         geom_point(size=3.5) + 
         ggtitle("14/12 Ratio") +
         ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
@@ -182,13 +181,10 @@ shinyServer(function(input, output, clientData, session) {
                 axis.text.y  = element_text(size=12))
       }  
     }  
-    
   })
   
   output$rat13Plot <- renderPlot({
-    
     #14/12 corrected by 13/12
-    
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
       ggplot(subData(), aes(Pos, cor1412he, color = Num)) + geom_boxplot() + 
@@ -198,7 +194,7 @@ shinyServer(function(input, output, clientData, session) {
         theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12)) 
     } else {
       if (input$type == 1) {
-        ggplot(subData(), aes(ts, cor1412he, color = as.factor(Pos))) + geom_point(size=3.5) + 
+        ggplot(subData(), aes(ts, cor1412he, color = Pos)) + geom_point(size=3.5) + 
           ggtitle("13/12C corrected 14/12 Ratio") +
           ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
           theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
@@ -211,11 +207,9 @@ shinyServer(function(input, output, clientData, session) {
           theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
       }
     }  
-    
   })
   
   output$curPlot <- renderPlot({
-      
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
       ggplot(subData(), aes(factor(Pos), he12C, color = Num)) + geom_boxplot() + 
@@ -223,31 +217,33 @@ shinyServer(function(input, output, clientData, session) {
         ylab(expression(paste("He 12C (", mu,"A)"))) +
         theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
         theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
-      
     } else {
-      ggplot(subData(), aes(ts, he12C, color = Num)) + geom_point(size=3.5) + 
-        colScale() + ggtitle("12C Currents") +
-        ylab(expression(paste("He 12C (", mu,"A)"))) +
-        theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
-        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
-    }  
-    
+      if (input$type == 1) {
+        ggplot(subData(), aes(ts, he12C, color = Pos)) + geom_point(size=3.5) + 
+          ggtitle("12C Currents") +
+          ylab(expression(paste("He 12C (", mu,"A)"))) +
+          theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+          theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+      } else {
+        ggplot(subData(), aes(ts, he12C, color = Num)) + geom_point(size=3.5) + 
+          colScale() + ggtitle("12C Currents") +
+          ylab(expression(paste("He 12C (", mu,"A)"))) +
+          theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+          theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+      }  
+    } 
   })
   
   output$curratPlot <- renderPlot({
-    
       ggplot(subData(), aes(he12C, cor1412he, color = Num)) + geom_point(size=3.5) + 
         colScale() + ggtitle("Ratio vs Current") +
         xlab(expression(paste("He 12C (", mu,"A)"))) +
         ylab(expression(paste("13C corrected 14/12C (x", 10^{-12},")"))) +
         theme(axis.title.x = element_text(size=16), axis.text.x  = element_text(size=12)) +
         theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
-     
-    
   })
   
   tableData <- reactive({
-
     subData() %>% mutate(Timestamp = strftime(ts,"%b-%d %H:%M:%S"),
                          X13.12he = X13.12he*100,
                          `LE12C (uA)` = format_num(le12C),
@@ -258,12 +254,9 @@ shinyServer(function(input, output, clientData, session) {
                          Name = Sample.Name, `LE12C (uA)`,
                          `HE12C (uA)`, `HE13/12C (x10E-2)`,
                          `HE14/12C (x10E-12)`) 
-      
   })
   
-  
   output$table <- renderDataTable(tableData())
-    
   
 })
 
