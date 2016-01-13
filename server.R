@@ -1,3 +1,4 @@
+# NOSAMS Wheel Status Web app
 
 # This is the server logic for a Shiny web application.
 # You can find out more about building applications with Shiny here:
@@ -14,7 +15,6 @@ library(lubridate)
 
 usamspath = "/mnt/shared/USAMS/Results"
 cfamspath = "/mnt/shared/CFAMS/CFAMS Results"
-#system = 1
 
 ##Define functions
 
@@ -22,6 +22,7 @@ cfamspath = "/mnt/shared/CFAMS/CFAMS Results"
 mungeCFWheel = function (z) {
   z %>% mutate(ts = as.POSIXct(strptime(
                   Run.Completion.Time, format = "%a %b %d %H:%M:%S %y")), 
+               Pos = as.factor(Pos),
                ce = 1/sqrt(CntTotGT), #Add counting error
                cor1412he = X14.12he/X13.12he^2 * 1E9, #Add corrected 14/12
                X14.12he = X14.12he * 1E12, #Convert ratio to 1E12
@@ -47,6 +48,7 @@ format_num <- function(col) {
 }
 
 
+#Main reactive shiny server logic
 shinyServer(function(input, output, clientData, session) {
         
   observe({
@@ -128,7 +130,7 @@ shinyServer(function(input, output, clientData, session) {
       #time remaining
       l <- tail(z, n = 1)
       #Need to calculate runs based on runlist for CFAMS
-      r <- 401 - 40 * (l$Meas - 1) - l$Pos #runs remaining
+      r <- 401 - 40 * (l$Meas - 1) - as.numeric(l$Pos) #runs remaining
       t <- r * 180 #seconds remaining
       h <- seconds_to_period(t)
       
@@ -189,7 +191,7 @@ shinyServer(function(input, output, clientData, session) {
     
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
-      ggplot(subData(), aes(factor(Pos), cor1412he, color = Num)) + geom_boxplot() + 
+      ggplot(subData(), aes(Pos, cor1412he, color = Num)) + geom_boxplot() + 
         colScale() + ggtitle("13/12C corrected 14/12 Ratio") +
         ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
         theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
