@@ -3,6 +3,7 @@
 
 
 #load libraries
+suppressPackageStartupMessages(library(stats))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(amstools))
 
