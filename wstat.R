@@ -19,6 +19,7 @@ wheel <- tail(wheels, 1)
 data <- mungeResfile(readResfile(wheel))
 
 #last run
+cat("Last 5 Runs:\n")
 print(select(tail(data), ts, Pos, Meas, Sample.Name, he12C, cor1412he))
 
 #current stats
@@ -27,5 +28,6 @@ sum  <- data %>% filter(Num == "S") %>%
   select(X14.12he, cor1412he) %>% 
   summarise_each(funs(mean, sd, rsd)) 
 
+cat("\nStandards Summary:\n")
 print(sum)
 
