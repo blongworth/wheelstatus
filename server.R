@@ -31,21 +31,22 @@ format_num <- function(col) {
 #Main reactive shiny server logic
 shinyServer(function(input, output, clientData, session) {
         
-  observe({
-    
+  output$wheelNames <- renderUI({
     #Get and order wheelnames by system
     details <- file.info(list.files(path = input$system, pattern = "*AMS*.*", full.names=TRUE))
     details <- details[with(details, order(as.POSIXct(mtime))), ]
     wheels <- basename(rownames(details))
-    
-    # Change values for input$wheelSelect
-    updateSelectInput(session, "wheelSelect",
-                      choices = wheels,
-                      selected = tail(wheels, n = 1))
-    
+    selectInput("wheelSelect",
+                label = h3("Wheel"),
+                choices = wheels,
+		selected = tail(wheels, n = 1))
   })
   
+  
   wheelData <- reactive({
+    
+    # If no file is selected, don't do anything
+    validate(need(input$wheelSelect, message = FALSE))
     
     wheelfile <- paste(input$system, input$wheelSelect, sep = "/")
     
