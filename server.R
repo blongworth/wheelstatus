@@ -134,6 +134,10 @@ shinyServer(function(input, output, clientData, session) {
   })
   
   output$ratPlot <- renderPlot({
+
+    # If no file is selected, don't do anything
+    validate(need(nrow(subData()) > 1, ''))
+
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
       ggplot(subData(), aes(factor(Pos), X14.12he, color = Num)) + 
@@ -166,6 +170,10 @@ shinyServer(function(input, output, clientData, session) {
   })
   
   output$rat13Plot <- renderPlot({
+
+    # If no file is selected, don't do anything
+    validate(need(nrow(subData()) > 1, ''))
+
     #14/12 corrected by 13/12
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
@@ -192,6 +200,10 @@ shinyServer(function(input, output, clientData, session) {
   })
   
   output$curPlot <- renderPlot({
+
+    # If no file is selected, don't do anything
+    validate(need(nrow(subData()) > 1, ''))
+
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
       ggplot(subData(), aes(factor(Pos), he12C, color = Num)) + geom_boxplot() + 
@@ -217,6 +229,10 @@ shinyServer(function(input, output, clientData, session) {
   })
   
   output$curratPlot <- renderPlot({
+
+    # If no file is selected, don't do anything
+    validate(need(nrow(subData()) > 1, ''))
+
       ggplot(subData(), aes(he12C, cor1412he, color = Num)) + geom_point(size=3.5) + 
         colScale() + ggtitle("Ratio vs Current") +
         xlab(expression(paste("He 12C (", mu,"A)"))) +
