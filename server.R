@@ -30,15 +30,18 @@ format_num <- function(col) {
 #Main reactive shiny server logic
 shinyServer(function(input, output, clientData, session) {
         
-  output$wheelNames <- renderUI({
+  observe({
+    
     #Get and order wheelnames by system
     details <- file.info(list.files(path = input$system, pattern = "*AMS*.*", full.names=TRUE))
     details <- details[with(details, order(as.POSIXct(mtime))), ]
     wheels <- basename(rownames(details))
-    selectInput("wheelSelect",
-                label = h3("Wheel"),
-                choices = wheels,
-		selected = tail(wheels, n = 1))
+    
+    # Change values for input$wheelSelect
+    updateSelectInput(session, "wheelSelect",
+                      choices = wheels,
+                      selected = tail(wheels, n = 1))
+    
   })
   
   
