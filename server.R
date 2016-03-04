@@ -8,8 +8,7 @@
 
 library(shiny)
 library(ggplot2)
-#library(plotly)
-library(dplyr)
+library(dplyr, warn.conflicts = FALSE)
 library(RColorBrewer)
 library(lubridate)
 library(amstools)
