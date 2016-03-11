@@ -67,6 +67,9 @@ shinyServer(function(input, output, clientData, session) {
     
     #Subset based on input
     if (input$type == 1) {
+      if (input$oxi) {
+        z <- filter(z, grepl("OX-I$", Sample.Name))
+      }
       filter(z, Num == "S")
     } else if (input$type == 2) {
       filter(z, Num == "B")
@@ -92,6 +95,10 @@ shinyServer(function(input, output, clientData, session) {
     
     z <- wheelData()
     
+    if (input$oxi) {
+      z <- filter(z, grepl("OX-I$", Sample.Name))
+    }
+
     sum <- z %>% filter(Num == "S") %>% 
       select(X14.12he, cor1412he) %>% 
       summarise_each(funs(mean, sd, rsd)) 
