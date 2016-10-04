@@ -10,8 +10,8 @@ library(shiny)
 library(ggplot2)
 library(dplyr, warn.conflicts = FALSE)
 library(RColorBrewer)
-library(lubridate)
-library(amstools)
+library(lubridate, warn.conflicts = FALSE)
+library(amstools, warn.conflicts = FALSE)
 
 usamspath = "/mnt/shared/USAMS/Results"
 cfamspath = "/mnt/shared/CFAMS/CFAMS Results"
