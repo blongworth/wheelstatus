@@ -24,7 +24,9 @@ print(select(tail(data), ts, Pos, Meas, Sample.Name, he12C, cor1412he))
 
 #current stats
 
-sum  <- data %>% filter(Num == "S", grepl("OX-I$", Sample.Name)) %>% 
+sum  <- data %>% filter(Num == "S",
+		       	grepl("OX-I", Sample.Name),
+		       	cor1412he > 9) %>% 
   select(X14.12he, cor1412he) %>% 
   summarise_each(funs(mean, sd, rsd)) 
 
