@@ -109,10 +109,13 @@ shinyServer(function(input, output, clientData, session) {
     c <- sprintf("Mean of 13C corrected standards is %.3f SD %.3f (RSD %.3f)", 
                  sum$cor1412he_mean, sum$cor1412he_sd, sum$cor1412he_rsd)
     
+    # Runs completed
+    runsdone <- nrow(z)
     #last run
-    lastrun <- z[length(z)]
-    lt <- z$Run.Completion.Time[length(z$Run.Completion.Time)]
-    lp <- z$Pos[length(z$Pos)]
+    
+    lastrun <- z[runsdone,]
+    lt <- lastrun$Run.Completion.Time
+    lp <- lastrun$Pos
     lr <- paste("Last run was position", lp, "at", lt)
     
     #skip time calculations for cfams
@@ -124,8 +127,6 @@ shinyServer(function(input, output, clientData, session) {
       
       # Calculate total runs in wheel
       runs <- sum(wheel$Repeats)
-      # Runs completed
-      runsdone <- nrow(z)
       
       # time per run so far
       
