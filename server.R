@@ -6,6 +6,7 @@
 # http://shiny.rstudio.com
 #
 
+library(readxl)
 library(shiny)
 library(ggplot2)
 library(dplyr, warn.conflicts = FALSE)
@@ -120,10 +121,16 @@ shinyServer(function(input, output, clientData, session) {
     
     #skip time calculations for cfams
     if (input$system == "/mnt/shared/USAMS/Results") {
-      
       # load wheelfile for time calculation
-      wheelfile <- paste("/mnt/shared/USAMS/Wheels", gsub('R', '', input$wheelSelect), sep = "/")
+      wheelfile <- paste("/mnt/shared/USAMS/Wheels", 
+                         gsub('R', '', input$wheelSelect), sep = "/")
       wheel <- read.delim(wheelfile)
+    } else {
+      # load wheelfile for time calculation
+      wheelfile <- paste("/mnt/shared/CFAMS/CFAMS Wheels", 
+                         gsub('R.XLS', '.xlsx', input$wheelSelect), sep = "/")
+      wheel <- read_excel(wheelfile)
+    }
       
       # Calculate total runs in wheel
       runs <- sum(wheel$Repeats)
@@ -142,10 +149,6 @@ shinyServer(function(input, output, clientData, session) {
         re <- paste("The run should end around", Sys.time() + t)
       }
       
-    } else {
-      rl <- ""
-      re <- ""
-    }
     
     HTML(paste(s, c, lr, rl, re, sep = '<br/>'))
     
