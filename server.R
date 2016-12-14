@@ -115,12 +115,20 @@ shinyServer(function(input, output, clientData, session) {
     
     #skip time calculations for cfams
     if (input$system == "/mnt/shared/USAMS/Results") {
-    
-      #time remaining
-      l <- tail(z, n = 1)
-      #Need to calculate runs based on runlist for CFAMS
-      r <- 401 - 40 * (l$Meas - 1) - as.numeric(l$Pos) #runs remaining
-      t <- r * 180 #seconds remaining
+      
+      # load wheelfile for time calculation
+      wheelfile <- paste("/mnt/shared/USAMS/Wheels", gsub('R', '', input$wheelSelect), sep = "/")
+      wheel <- read.delim(wheelfile)
+      
+      # Calculate total runs in wheel
+      runs <- sum(wheel$Repeats)
+      # Runs completed
+      runsdone <- nrow(z)
+      
+      # time per run so far
+      
+      r <- runs - runsdone  # runs remaining
+      t <- r * 190 #seconds remaining
       h <- seconds_to_period(t)
       
       if (r <= 0) {
