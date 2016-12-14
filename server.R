@@ -68,7 +68,7 @@ shinyServer(function(input, output, clientData, session) {
     #Subset based on input
     if (input$type == 1) {
       if (input$oxi) {
-        z <- filter(z, grepl("OX-I$", Sample.Name))
+        z <- filter(z, grepl("OX-I[^I]", Sample.Name))
       }
       filter(z, Num == "S")
     } else if (input$type == 2) {
@@ -95,13 +95,14 @@ shinyServer(function(input, output, clientData, session) {
     
     z <- wheelData()
     
+    sum <- z %>% filter(Num == "S")
     if (input$oxi) {
-      z <- filter(z, grepl("OX-I$", Sample.Name))
+      sum <- filter(sum, grepl("OX-I[^I]", Sample.Name))
     }
-
-    sum <- z %>% filter(Num == "S") %>% 
+    sum <- sum %>%  
       select(X14.12he, cor1412he) %>% 
       summarise_each(funs(mean, sd, rsd)) 
+    
     
     s <- sprintf("Mean of Standards is %.3f SD %.3f (RSD %.3f)", 
                  sum$X14.12he_mean, sum$X14.12he_sd, sum$X14.12he_rsd)
@@ -109,8 +110,9 @@ shinyServer(function(input, output, clientData, session) {
                  sum$cor1412he_mean, sum$cor1412he_sd, sum$cor1412he_rsd)
     
     #last run
-    lt <- tail(z$Run.Completion.Time, n = 1)
-    lp <- tail(z$Pos, n = 1)
+    lastrun <- z[length(z)]
+    lt <- z$Run.Completion.Time[length(z$Run.Completion.Time)]
+    lp <- z$Pos[length(z$Pos)]
     lr <- paste("Last run was position", lp, "at", lt)
     
     #skip time calculations for cfams
