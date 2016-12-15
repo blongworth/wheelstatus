@@ -119,7 +119,7 @@ shinyServer(function(input, output, clientData, session) {
     lp <- lastrun$Pos
     lr <- paste("Last run was position", lp, "at", lt)
     
-    #skip time calculations for cfams
+    # load wheelfiles
     if (input$system == "/mnt/shared/USAMS/Results") {
       # load wheelfile for time calculation
       wheelfile <- paste("/mnt/shared/USAMS/Wheels", 
@@ -132,24 +132,25 @@ shinyServer(function(input, output, clientData, session) {
       wheel <- read_excel(wheelfile)
     }
       
-      # Calculate total runs in wheel
-      runs <- sum(wheel$Repeats)
-      
-      # time per run so far
-      
-      r <- runs - runsdone  # runs remaining
-      t <- r * 190 #seconds remaining
-      h <- seconds_to_period(t)
-      
-      if (r <= 0) {
-        rl <- paste("Run finished:", lt)
-        re <- ""
-      } else {
-        rl <- paste(r, "runs to go, which will take about", h)
-        re <- paste("The run should end around", Sys.time() + t)
-      }
-      
+    # Calculate total runs in wheel
+    runs <- sum(wheel$Repeats)
     
+    # time per run so far
+    wheeltime <- difftime(lastrun$ts[1], z$ts[1], units = 'secs')
+    runtime <- wheeltime / runsdone
+    r <- runs - runsdone  # runs remaining
+    t <- r * runtime #seconds remaining
+    h <- seconds_to_period(t)
+    
+    if (r <= 0) {
+      rl <- paste("Run finished:", lt)
+      re <- ""
+    } else {
+      rl <- paste(r, "runs to go, which will take about", h)
+      re <- paste("The run should end around", Sys.time() + t)
+    }
+    
+    # Output as html
     HTML(paste(s, c, lr, rl, re, sep = '<br/>'))
     
   })
