@@ -6,6 +6,7 @@
 suppressPackageStartupMessages(library(stats))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(amstools))
+suppressPackageStartupMessages(library(lubridate))
 
 #directories
 usamspath <- "/mnt/shared/USAMS/Results"
@@ -18,16 +19,6 @@ wheels <- rownames(details)
 wheel <- tail(wheels, 1)
 z <- mungeResfile(readResfile(wheel))
 
-# wheel finish time
-
-
-if (r <= 0) {
-  rl <- paste("Run finished:", lt)
-  re <- ""
-} else {
-  rl <- paste(r, "runs to go, which will take about", h)
-  re <- paste("The run should end around", Sys.time() + t)
-}
 
 # Runs completed
 runsdone <- nrow(z)
@@ -64,6 +55,7 @@ if (r <= 0) {
 }
 
 cat(rl)
+cat("\n")
 cat(re)
 cat("\n\n")
 #last run
