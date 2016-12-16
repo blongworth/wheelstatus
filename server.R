@@ -96,7 +96,8 @@ shinyServer(function(input, output, clientData, session) {
     
     z <- wheelData()
     
-    sum <- z %>% filter(Num == "S")
+    sum <- z %>% filter(Num == "S",
+                        X14.12he > .98)
     if (input$oxi) {
       sum <- filter(sum, grepl("OX-I[^I]", Sample.Name))
     }
@@ -123,12 +124,12 @@ shinyServer(function(input, output, clientData, session) {
     if (input$system == "/mnt/shared/USAMS/Results") {
       # load wheelfile for time calculation
       wheelfile <- paste("/mnt/shared/USAMS/Wheels", 
-                         gsub('R', '', input$wheelSelect), sep = "/")
+                         gsub('R.*\\.txt', '.txt', input$wheelSelect), sep = "/")
       wheel <- read.delim(wheelfile)
     } else {
       # load wheelfile for time calculation
       wheelfile <- paste("/mnt/shared/CFAMS/CFAMS Wheels", 
-                         gsub('R.XLS', '.xlsx', input$wheelSelect), sep = "/")
+                         gsub('R.*\\.XLS', '.xlsx', input$wheelSelect), sep = "/")
       wheel <- read_excel(wheelfile)
     }
       
