@@ -141,6 +141,7 @@ shinyServer(function(input, output, clientData, session) {
     r <- runs - runsdone  # runs remaining
     t <- r * runtime #seconds remaining
     h <- seconds_to_period(t)
+    h$second <- round(h$second)
     
     if (r <= 0) {
       rl <- paste("Run finished:", lt)
