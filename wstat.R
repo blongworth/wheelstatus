@@ -8,6 +8,8 @@ suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(amstools))
 suppressPackageStartupMessages(library(lubridate))
 
+options(digits = 4)
+
 #directories
 usamspath <- "/mnt/shared/USAMS/Results"
 
@@ -60,14 +62,14 @@ cat(re)
 cat("\n\n")
 #last run
 cat("Last 5 Runs:\n")
-print(select(tail(z), ts, Pos, Meas, Sample.Name, he12C, cor1412he))
+print(select(tail(z), ts, Pos, Meas, Name = Sample.Name, he12C, cor1412he))
 
 #current stats
 
 sum  <- z %>% filter(Num == "S",
                      grepl("OX-I", Sample.Name),
                      cor1412he > 9) %>% 
-  select(X14.12he, cor1412he) %>% 
+  select(raw1412 = X14.12he, cor1412 = cor1412he) %>% 
   summarise_each(funs(mean, sd, rsd)) 
 
 cat("\nStandards Summary:\n")
