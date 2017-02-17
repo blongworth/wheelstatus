@@ -169,16 +169,20 @@ shinyServer(function(input, output, clientData, session) {
         colScale() + ggtitle("Ratio Boxplot") +
         ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
         theme(axis.title.x = element_blank()) + 
-        #theme(legend.position="none") +
         theme(axis.title.y = element_text(size=16), 
               axis.text.y  = element_text(size=12)) 
     } else {
       if (input$type == 1) {
         ggplot(subData(), aes(ts, X14.12he, color=Pos)) + 
+	geom_hline(yintercept = mean(X14.12he)) +
+	geom_hline(yintercept = mean(X14.12he) + sd(X14.12he)) +
+	geom_hline(yintercept = mean(X14.12he) - sd(X14.12he)) +
+	# TODO: use geom_area?
+	geom_linerange(aes(ymin=X14.12he - int_err, ymax = X14.12he + int_err)) +
         geom_point(size=3.5) + 
         ggtitle("14/12 Ratio") +
         ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
-        theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+        theme(axis.title.x = element_blank()) + 
         theme(axis.title.y = element_text(size=16), 
               axis.text.y  = element_text(size=12))
       } else {
@@ -186,7 +190,7 @@ shinyServer(function(input, output, clientData, session) {
           geom_point(size=3.5) + 
           colScale() + ggtitle("14/12 Ratio") +
           ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
-          theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+          theme(axis.title.x = element_blank()) + 
           theme(axis.title.y = element_text(size=16), 
                 axis.text.y  = element_text(size=12))
       }  
