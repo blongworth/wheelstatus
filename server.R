@@ -173,18 +173,22 @@ shinyServer(function(input, output, clientData, session) {
               axis.text.y  = element_text(size=12)) 
     } else {
       if (input$type == 1) {
-        ggplot(subData(), aes(ts, X14.12he, color=Pos)) + 
-	geom_hline(yintercept = mean(X14.12he)) +
-	geom_hline(yintercept = mean(X14.12he) + sd(X14.12he)) +
-	geom_hline(yintercept = mean(X14.12he) - sd(X14.12he)) +
-	# TODO: use geom_area?
-	geom_linerange(aes(ymin=X14.12he - int_err, ymax = X14.12he + int_err)) +
-        geom_point(size=3.5) + 
-        ggtitle("14/12 Ratio") +
-        ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
-        theme(axis.title.x = element_blank()) + 
-        theme(axis.title.y = element_text(size=16), 
-              axis.text.y  = element_text(size=12))
+        data <- subData()
+        m14 <- mean(data$X14.12he)
+        s14 <- sd(data$X14.12he)
+        pce <- data$ce*data$X14.12he
+        ggplot(data, aes(ts, X14.12he, color=Pos)) + 
+          geom_hline(yintercept = m14) +
+          geom_hline(yintercept = m14 + s14, color = "grey") +
+          geom_hline(yintercept = m14 - s14, color = "grey") +
+          # TODO: use geom_area?
+          geom_linerange(aes(ymin=X14.12he - pce, ymax = X14.12he + pce)) +
+          geom_point(size=3.5) + 
+          ggtitle("14/12 Ratio") +
+          ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
+          theme(axis.title.x = element_blank()) + 
+          theme(axis.title.y = element_text(size=16), 
+                axis.text.y  = element_text(size=12))
       } else {
         ggplot(subData(), aes(ts, X14.12he, color = Num)) + 
           geom_point(size=3.5) + 
@@ -212,7 +216,17 @@ shinyServer(function(input, output, clientData, session) {
         theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12)) 
     } else {
       if (input$type == 1) {
-        ggplot(subData(), aes(ts, cor1412he, color = Pos)) + geom_point(size=3.5) + 
+        data <- subData()
+        m14 <- mean(data$cor1412he)
+        s14 <- sd(data$cor1412he)
+        pce <- data$ce*data$cor1412he
+        ggplot(data, aes(ts, cor1412he, color=Pos)) + 
+          geom_hline(yintercept = m14) +
+          geom_hline(yintercept = m14 + s14, color = "grey") +
+          geom_hline(yintercept = m14 - s14, color = "grey") +
+          # TODO: use geom_area?
+          geom_linerange(aes(ymin=cor1412he - pce, ymax = cor1412he + pce )) +
+          geom_point(size=3.5) + 
           ggtitle("13/12C corrected 14/12 Ratio") +
           ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
           theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
@@ -260,7 +274,8 @@ shinyServer(function(input, output, clientData, session) {
 
     # If no file is selected, don't do anything
     validate(need(nrow(subData()) > 1, ''))
-
+    validate(need(input$type == 1, ''))
+    
       ggplot(subData(), aes(he12C, cor1412he, color = Num)) + geom_point(size=3.5) + 
         colScale() + ggtitle("Ratio vs Current") +
         xlab(expression(paste("He 12C (", mu,"A)"))) +
