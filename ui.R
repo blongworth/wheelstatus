@@ -29,14 +29,12 @@ shinyUI(
         checkboxInput("box", label = "Boxplot?", value = FALSE),
         checkboxInput("oxi", label = "Use only OX-I primaries?", value = FALSE)
       ),
+      
 
       # Stats and Plots
       mainPanel(
         htmlOutput("stdData"),
-        plotOutput("ratPlot"),
-        plotOutput("rat13Plot"),
-        plotOutput("curPlot"),
-        plotOutput("curratPlot")
+        plotOutput("Plot", height = "1000px")
       )
     ),
 

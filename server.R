@@ -13,7 +13,7 @@ library(dplyr, warn.conflicts = FALSE)
 library(RColorBrewer)
 library(lubridate, warn.conflicts = FALSE)
 library(amstools, warn.conflicts = FALSE)
-
+library(gridExtra)
 usamspath = "/mnt/shared/USAMS/Results"
 cfamspath = "/mnt/shared/CFAMS/CFAMS Results"
 
@@ -157,131 +157,111 @@ shinyServer(function(input, output, clientData, session) {
     
   })
   
-  output$ratPlot <- renderPlot({
+  output$Plot <- renderPlot({
 
     # If no file is selected, don't do anything
     validate(need(nrow(subData()) > 1, ''))
 
+    # Get data and add error bits
+        data <- subData()
+
     if (input$box == 1) {
       #try position_dodge to add points to boxplot
-      ggplot(subData(), aes(factor(Pos), X14.12he, color = Num)) + 
+      g1 <- ggplot(data, aes(factor(Pos), X14.12he, color = Num)) + 
         geom_boxplot() + 
         colScale() + ggtitle("Ratio Boxplot") +
         ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
         theme(axis.title.x = element_blank()) + 
         theme(axis.title.y = element_text(size=16), 
               axis.text.y  = element_text(size=12)) 
+      
+      g2 <- ggplot(data, aes(Pos, cor1412he, color = Num)) + geom_boxplot() + 
+        colScale() + ggtitle("13/12C corrected 14/12 Ratio") +
+        ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
+        theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12)) 
+      
+      g3 <- ggplot(data, aes(factor(Pos), he12C, color = Num)) + geom_boxplot() + 
+        colScale() + ggtitle("12C Boxplot") +
+        ylab(expression(paste("He 12C (", mu,"A)"))) +
+        theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+      plots <- list(g1, g2, g3)
     } else {
+      
       if (input$type == 1) {
-        data <- subData()
+
+        #add errors
         m14 <- mean(data$X14.12he)
         s14 <- sd(data$X14.12he)
-        pce <- data$ce*data$X14.12he
-        ggplot(data, aes(ts, X14.12he, color=Pos)) + 
+        pce14 <- data$ce*data$X14.12he
+        m1413 <- mean(data$cor1412he)
+        s1413 <- sd(data$cor1412he)
+        pce1413 <- data$ce*data$cor1412he
+        
+        g1 <- ggplot(data, aes(ts, X14.12he, color=Pos)) + 
           geom_hline(yintercept = m14) +
           geom_hline(yintercept = m14 + s14, color = "grey") +
           geom_hline(yintercept = m14 - s14, color = "grey") +
           # TODO: use geom_area?
-          geom_linerange(aes(ymin=X14.12he - pce, ymax = X14.12he + pce)) +
-          geom_point(size=3.5) + 
+          geom_linerange(aes(ymin=X14.12he - pce14, ymax = X14.12he + pce14)) +
+          geom_point(size=3) + 
           ggtitle("14/12 Ratio") +
           ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
           theme(axis.title.x = element_blank()) + 
           theme(axis.title.y = element_text(size=16), 
                 axis.text.y  = element_text(size=12))
+        
+        g2 <- ggplot(data, aes(ts, cor1412he, color=Pos)) + 
+          geom_hline(yintercept = m1413) +
+          geom_hline(yintercept = m1413 + s1413, color = "grey") +
+          geom_hline(yintercept = m1413 - s1413, color = "grey") +
+          # TODO: use geom_area?
+          geom_linerange(aes(ymin=cor1412he - pce1413, ymax = cor1412he + pce1413 )) +
+          geom_point(size=3) + 
+          ggtitle("13/12C corrected 14/12 Ratio") +
+          ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
+          theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+          theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+        
+        g3 <- ggplot(data, aes(ts, he12C, color = Pos)) + geom_point(size=3) + 
+          ggtitle("12C Currents") +
+          ylab(expression(paste("He 12C (", mu,"A)"))) +
+          theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
+          theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+        
+        g4 <- ggplot(data, aes(he12C, cor1412he, color = Num)) + geom_point(size=3) + 
+          colScale() + ggtitle("Ratio vs Current") +
+          xlab(expression(paste("He 12C (", mu,"A)"))) +
+          ylab(expression(paste("13C corrected 14/12C (x", 10^{-12},")"))) +
+          theme(axis.title.x = element_text(size=16), axis.text.x  = element_text(size=12)) +
+          theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+       plots <- list(g1, g2, g3, g4) 
       } else {
-        ggplot(subData(), aes(ts, X14.12he, color = Num)) + 
-          geom_point(size=3.5) + 
+
+        g1 <- ggplot(data, aes(ts, X14.12he, color = Num)) + 
+          geom_point(size=3) + 
           colScale() + ggtitle("14/12 Ratio") +
           ylab(expression(paste("Raw 14/12C (x", 10^{-12},")"))) +
           theme(axis.title.x = element_blank()) + 
           theme(axis.title.y = element_text(size=16), 
                 axis.text.y  = element_text(size=12))
-      }  
-    }  
-  })
-  
-  output$rat13Plot <- renderPlot({
 
-    # If no file is selected, don't do anything
-    validate(need(nrow(subData()) > 1, ''))
-
-    #14/12 corrected by 13/12
-    if (input$box == 1) {
-      #try position_dodge to add points to boxplot
-      ggplot(subData(), aes(Pos, cor1412he, color = Num)) + geom_boxplot() + 
-        colScale() + ggtitle("13/12C corrected 14/12 Ratio") +
-        ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
-        theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
-        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12)) 
-    } else {
-      if (input$type == 1) {
-        data <- subData()
-        m14 <- mean(data$cor1412he)
-        s14 <- sd(data$cor1412he)
-        pce <- data$ce*data$cor1412he
-        ggplot(data, aes(ts, cor1412he, color=Pos)) + 
-          geom_hline(yintercept = m14) +
-          geom_hline(yintercept = m14 + s14, color = "grey") +
-          geom_hline(yintercept = m14 - s14, color = "grey") +
-          # TODO: use geom_area?
-          geom_linerange(aes(ymin=cor1412he - pce, ymax = cor1412he + pce )) +
-          geom_point(size=3.5) + 
-          ggtitle("13/12C corrected 14/12 Ratio") +
-          ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
-          theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
-          theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
-      } else {
-        ggplot(subData(), aes(ts, cor1412he, color = Num)) + geom_point(size=3.5) + 
+        g2 <- ggplot(data, aes(ts, cor1412he, color = Num)) + geom_point(size=3) + 
           colScale() + ggtitle("13/12C corrected 14/12 Ratio") +
           ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
           theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
           theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
-      }
-    }  
-  })
-  
-  output$curPlot <- renderPlot({
 
-    # If no file is selected, don't do anything
-    validate(need(nrow(subData()) > 1, ''))
-
-    if (input$box == 1) {
-      #try position_dodge to add points to boxplot
-      ggplot(subData(), aes(factor(Pos), he12C, color = Num)) + geom_boxplot() + 
-        colScale() + ggtitle("12C Boxplot") +
-        ylab(expression(paste("He 12C (", mu,"A)"))) +
-        theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
-        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
-    } else {
-      if (input$type == 1) {
-        ggplot(subData(), aes(ts, he12C, color = Pos)) + geom_point(size=3.5) + 
-          ggtitle("12C Currents") +
-          ylab(expression(paste("He 12C (", mu,"A)"))) +
-          theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
-          theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
-      } else {
-        ggplot(subData(), aes(ts, he12C, color = Num)) + geom_point(size=3.5) + 
+        g3 <- ggplot(data, aes(ts, he12C, color = Num)) + geom_point(size=3) + 
           colScale() + ggtitle("12C Currents") +
           ylab(expression(paste("He 12C (", mu,"A)"))) +
           theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
           theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+      plots <- list(g1, g2, g3)
       }  
-    } 
-  })
-  
-  output$curratPlot <- renderPlot({
-
-    # If no file is selected, don't do anything
-    validate(need(nrow(subData()) > 1, ''))
-    validate(need(input$type == 1, ''))
-    
-      ggplot(subData(), aes(he12C, cor1412he, color = Num)) + geom_point(size=3.5) + 
-        colScale() + ggtitle("Ratio vs Current") +
-        xlab(expression(paste("He 12C (", mu,"A)"))) +
-        ylab(expression(paste("13C corrected 14/12C (x", 10^{-12},")"))) +
-        theme(axis.title.x = element_text(size=16), axis.text.x  = element_text(size=12)) +
-        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+    }  
+    marrangeGrob(plots, nrow=length(plots), ncol=1, top = NULL)
   })
   
   tableData <- reactive({
