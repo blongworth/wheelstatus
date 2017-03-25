@@ -58,8 +58,16 @@ shinyServer(function(input, output, clientData, session) {
     
     #Code to reload wheel when file changes
     file <- reactiveFileReader(5000, session, wheelfile, read.delim, skip = 4, comment.char = "=")
-    mungeResfile(file())
+    z <- mungeResfile(file())
     
+    # Last group only?
+    if (input$group) {
+	    Meas <- z$Meas
+	    lag.Meas <- c(tail(Meas, -1), NA)
+	    z[-(1:which(Meas != lag.Meas & Meas != lag.Meas -1)),]
+    } else {
+	    z
+    }
   })
 
   subData <- reactive({

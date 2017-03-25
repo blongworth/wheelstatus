@@ -75,3 +75,15 @@ sum  <- z %>% filter(Num == "S",
 cat("\nStandards Summary:\n")
 print(sum)
 
+Meas <- z$Meas
+lag.Meas <- c(tail(Meas, -1), NA)
+z <- z[-(1:which(Meas != lag.Meas & Meas != lag.Meas -1)),]
+
+sum  <- z %>% filter(Num == "S",
+                     grepl("OX-I", Sample.Name),
+                     cor1412he > 9) %>% 
+  select(raw1412 = X14.12he, cor1412 = cor1412he) %>% 
+  summarise_each(funs(mean, sd, rsd)) 
+
+cat("\nSummary, last group only:\n")
+print(sum)

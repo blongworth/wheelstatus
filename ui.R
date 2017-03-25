@@ -27,7 +27,8 @@ shinyUI(
                      choices = list("Standards" = 1, "Blanks" = 2, "All samples" = 3),
                      selected = 1),
         checkboxInput("box", label = "Boxplot?", value = FALSE),
-        checkboxInput("oxi", label = "Use only OX-I primaries?", value = FALSE)
+        checkboxInput("oxi", label = "Use only OX-I primaries?", value = FALSE),
+        checkboxInput("group", label = "Last group only?", value = FALSE)
       ),
       
 
