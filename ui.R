@@ -3,6 +3,8 @@
 #
 # http://shiny.rstudio.com
 #
+# TODO: Fix group choice
+
 
 library(shiny)
 usamspath = "/mnt/shared/USAMS/Results"

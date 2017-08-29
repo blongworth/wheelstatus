@@ -121,12 +121,20 @@ shinyServer(function(input, output, clientData, session) {
     
     # Runs completed
     runsdone <- nrow(z)
-    #last run
     
+    #last run
     lastrun <- z[runsdone,]
     lt <- lastrun$Run.Completion.Time
     lp <- lastrun$Pos
     lr <- paste("Last run was position", lp, "at", lt)
+    
+    #still running?
+    lasttime <- difftime(Sys.time(),lastrun$ts, units = c("secs"))
+    if( lasttime < 240) {
+      status <- paste('<h3 style="color:green">Run active</h3>')
+    } else {
+      status <- paste('<h3 style="color:red">Run stopped</h3>')
+    }
     
     # load wheelfiles
     if (input$system == "/mnt/shared/USAMS/Results") {
@@ -161,7 +169,7 @@ shinyServer(function(input, output, clientData, session) {
     }
     
     # Output as html
-    HTML(paste(s, c, lr, rl, re, sep = '<br/>'))
+    HTML(paste(status, s, c, lr, rl, re, sep = '<br/>'))
     
   })
   
