@@ -70,7 +70,7 @@ sum  <- z %>% filter(Num == "S",
                      grepl("OX-I", Sample.Name),
                      cor1412he > 9) %>% 
   select(raw1412 = X14.12he, cor1412 = cor1412he) %>% 
-  summarise_each(funs(mean, sd, rsd)) 
+  summarise_all(funs(mean, sd, rsd)) 
 
 cat("\nStandards Summary:\n")
 print(sum)
@@ -83,7 +83,7 @@ sum  <- z %>% filter(Num == "S",
                      grepl("OX-I", Sample.Name),
                      cor1412he > 9) %>% 
   select(raw1412 = X14.12he, cor1412 = cor1412he) %>% 
-  summarise_each(funs(mean, sd, rsd)) 
+  summarise_all(funs(mean, sd, rsd)) 
 
 cat("\nSummary, last group only:\n")
 print(sum)
