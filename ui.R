@@ -1,12 +1,10 @@
-# This is the user-interface definition of a Shiny web application.
-# You can find out more about building applications with Shiny here:
-#
-# http://shiny.rstudio.com
+# Wheelstatus shiny webapp UI
 #
 # TODO: Fix group choice
 
-
 library(shiny)
+library(DT)
+
 usamspath = "/mnt/shared/USAMS/Results"
 cfamspath = "/mnt/shared/CFAMS/CFAMS Results"
 

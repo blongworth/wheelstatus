@@ -280,20 +280,18 @@ shinyServer(function(input, output, clientData, session) {
     marrangeGrob(plots, nrow=length(plots), ncol=1, top = NULL)
   })
   
-  tableData <- reactive({
+  
+  output$table <- renderDataTable({
     subData() %>% mutate(Timestamp = strftime(ts,"%b-%d %H:%M:%S"),
                          X13.12he = X13.12he*100,
                          `LE12C (uA)` = format_num(le12C),
                          `HE12C (uA)` = format_num(he12C),
                          `HE13/12C (x10E-2)` = format_num(X13.12he),
                          `HE14/12C (x10E-12)` = format_num(X14.12he)) %>%
-                  select(Timestamp, Position = Pos, Measurement = Meas,
+                  select(Timestamp, Pos, Meas,
                          Name = Sample.Name, `LE12C (uA)`,
                          `HE12C (uA)`, `HE13/12C (x10E-2)`,
                          `HE14/12C (x10E-12)`) 
-  })
-  
-  output$table <- renderDataTable(tableData())
-  
+  }, options = list(scrollY = '400px', scrollCollapse = TRUE, paging = FALSE))
 })
 
