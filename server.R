@@ -13,7 +13,7 @@ library(dplyr, warn.conflicts = FALSE)
 library(RColorBrewer)
 library(lubridate, warn.conflicts = FALSE)
 library(amstools, warn.conflicts = FALSE)
-library(gridExtra)
+library(gridExtra, warn.conflicts = FALSE)
 usamspath = "/mnt/shared/USAMS/Results"
 cfamspath = "/mnt/shared/CFAMS/CFAMS Results"
 

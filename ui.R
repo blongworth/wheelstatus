@@ -3,7 +3,7 @@
 # TODO: Fix group choice
 
 library(shiny)
-library(DT)
+library(DT, warn.conflicts = FALSE)
 
 usamspath = "/mnt/shared/USAMS/Results"
 cfamspath = "/mnt/shared/CFAMS/CFAMS Results"
