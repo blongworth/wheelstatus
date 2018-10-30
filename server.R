@@ -1,11 +1,6 @@
 # NOSAMS Wheel Status Web app
 
-# This is the server logic for a Shiny web application.
-# You can find out more about building applications with Shiny here:
-#
-# http://shiny.rstudio.com
-#
-
+# Load libraries
 library(readxl)
 library(shiny)
 library(ggplot2)
@@ -14,12 +9,12 @@ library(RColorBrewer)
 library(lubridate, warn.conflicts = FALSE)
 library(amstools, warn.conflicts = FALSE)
 library(gridExtra, warn.conflicts = FALSE)
+
+# Define constants
 usamspath = "/mnt/shared/USAMS/Results"
 cfamspath = "/mnt/shared/CFAMS/CFAMS Results"
 
-##Define functions
-
-#Function for formatting table
+# Define function for formatting table
 format_num <- function(col) {
   if (is.numeric(col))
     sprintf('%1.4f', col)
@@ -27,13 +22,12 @@ format_num <- function(col) {
     col
 }
 
-
-#Main reactive shiny server logic
+# Main reactive shiny server logic
 shinyServer(function(input, output, clientData, session) {
         
   observe({
     
-    #Get and order wheelnames by system
+    # Get and order wheelnames by system
     details <- file.info(list.files(path = input$system, pattern = "*AMS*.*", full.names=TRUE))
     details <- details[with(details, order(as.POSIXct(mtime))), ]
     wheels <- basename(rownames(details))
@@ -42,9 +36,7 @@ shinyServer(function(input, output, clientData, session) {
     updateSelectInput(session, "wheelSelect",
                       choices = wheels,
                       selected = tail(wheels, n = 1))
-    
   })
-  
   
   wheelData <- reactive({
     
@@ -53,10 +45,10 @@ shinyServer(function(input, output, clientData, session) {
     
     wheelfile <- paste(input$system, input$wheelSelect, sep = "/")
     
-    #Check that we've selected a valid file
+    # Check that we've selected a valid file
     validate(need(file.exists(wheelfile), message=FALSE))
     
-    #Code to reload wheel when file changes
+    # Reload wheel when file changes
     file <- reactiveFileReader(5000, session, wheelfile, read.delim, skip = 4, comment.char = "=")
     z <- mungeResfile(file())
     
@@ -70,11 +62,9 @@ shinyServer(function(input, output, clientData, session) {
     }
   })
 
+  # Subset based on input
   subData <- reactive({
-    
     z <- wheelData()
-    
-    #Subset based on input
     if (input$type == 1) {
       if (input$oxi) {
         z <- filter(z, grepl("OX-I[^I]", Sample.Name))
@@ -85,21 +75,17 @@ shinyServer(function(input, output, clientData, session) {
     } else {
       z
     }
-    
   })  
   
+  # Create a custom color scale
   colScale <- reactive({
-    
     z <- wheelData()
-    
-    #Create a custom color scale
     myColors <- brewer.pal(length(levels(z$Num)),"Set1")
     names(myColors) <- levels(z$Num)
     scale_colour_manual(name = "Num",values = myColors)
-    
   })
   
-  #run statistics
+  # Run statistics
   output$stdData <- renderUI({ 
     
     z <- wheelData()
@@ -122,13 +108,13 @@ shinyServer(function(input, output, clientData, session) {
     # Runs completed
     runsdone <- nrow(z)
     
-    #last run
+    # Last run
     lastrun <- z[runsdone,]
     lt <- lastrun$Run.Completion.Time
     lp <- lastrun$Pos
     lr <- paste("Last run was position", lp, "at", lt)
     
-    #still running?
+    # Still running?
     lasttime <- difftime(Sys.time(),lastrun$ts, units = c("secs"))
     if( lasttime < 240) {
       status <- paste('<h3 style="color:green">Run active</h3>')
@@ -207,7 +193,7 @@ shinyServer(function(input, output, clientData, session) {
       
       if (input$type == 1) {
 
-        #add errors
+        # Add errors
         m14 <- mean(data$X14.12he)
         s14 <- sd(data$X14.12he)
         pce14 <- data$ce*data$X14.12he

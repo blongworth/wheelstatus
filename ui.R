@@ -39,8 +39,8 @@ shinyUI(
       )
     ),
 
+    # Data table
     fluidRow(
-      #Data table
       dataTableOutput(outputId="table")
     )
   )
