@@ -114,14 +114,6 @@ shinyServer(function(input, output, clientData, session) {
     lp <- lastrun$Pos
     lr <- paste("Last run was position", lp, "at", lt)
     
-    # Still running?
-    lasttime <- difftime(Sys.time(),lastrun$ts, units = c("secs"))
-    if( lasttime < 240) {
-      status <- paste('<h3 style="color:green">Run active</h3>')
-    } else {
-      status <- paste('<h3 style="color:red">Run stopped</h3>')
-    }
-    
     # load wheelfiles
     if (input$system == "/mnt/shared/USAMS/Results") {
       # load wheelfile for time calculation
@@ -146,13 +138,25 @@ shinyServer(function(input, output, clientData, session) {
     h <- seconds_to_period(t)
     h$second <- round(h$second)
     
-    if (r <= 0) {
-      rl <- paste("Run finished:", lt)
-      re <- ""
+    # Still running?
+    lasttime <- difftime(Sys.time(),lastrun$ts, units = c("secs"))
+    if( lasttime < 500) {
+      status <- paste('<h3 style="color:green">Run active</h3>')
+      if (r > 0) {
+        rl <- paste(r, "runs to go, which will take about", h)
+        re <- paste("The run should end around", Sys.time() + t)
+      } else {
+        rl <- ""
+        re <- ""
+      }
     } else {
-      rl <- paste(r, "runs to go, which will take about", h)
-      re <- paste("The run should end around", Sys.time() + t)
+      if (r <= 0) {
+        rl <- paste("Run finished:", lt)
+        re <- ""
+        status <- ""
+      }
     }
+    
     
     # Output as html
     HTML(paste(status, s, c, lr, rl, re, sep = '<br/>'))
