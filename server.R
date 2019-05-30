@@ -97,7 +97,7 @@ shinyServer(function(input, output, clientData, session) {
     }
     sum <- sum %>%  
       select(X14.12he, cor1412he) %>% 
-      summarise_all(funs(mean, sd, rsd)) 
+      summarise_all(list(~mean(.), ~sd(.), ~rsd(.))) 
     
     
     s <- sprintf("Mean of Standards is %.3f SD %.3f (RSD %.3f)", 
