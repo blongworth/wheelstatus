@@ -70,7 +70,7 @@ sum  <- z %>% filter(Num == "S",
                      grepl("OX-I", Sample.Name),
                      cor1412he > 8.8) %>% 
   select(raw1412 = X14.12he, cor1412 = cor1412he) %>% 
-  summarise_all(funs(mean, sd, rsd)) 
+  summarise_all(list(~mean(.), ~sd(.), ~rsd(.))) 
 
 
 cat("\nStandards Summary:\n")
