@@ -28,7 +28,9 @@ shinyServer(function(input, output, clientData, session) {
   observe({
     
     # Get and order wheelnames by system
-    details <- file.info(list.files(path = input$system, pattern = "*AMS*.*", full.names=TRUE))
+    details <- file.info(list.files(path = input$system, 
+		                    pattern = "*AMS*.*", 
+				    full.names=TRUE))
     details <- details[with(details, order(as.POSIXct(mtime))), ]
     wheels <- basename(rownames(details))
     
@@ -49,7 +51,8 @@ shinyServer(function(input, output, clientData, session) {
     validate(need(file.exists(wheelfile), message=FALSE))
     
     # Reload wheel when file changes
-    file <- reactiveFileReader(5000, session, wheelfile, read.delim, skip = 4, comment.char = "=")
+    file <- reactiveFileReader(5000, session, wheelfile, read.delim, 
+	                       skip = 4, comment.char = "=")
     z <- mungeResfile(file())
     
     # Last group only?
@@ -118,12 +121,14 @@ shinyServer(function(input, output, clientData, session) {
     if (input$system == "/mnt/shared/USAMS/Results") {
       # load wheelfile for time calculation
       wheelfile <- paste("/mnt/shared/USAMS/Wheels", 
-                         gsub('R.*\\.txt', '.txt', input$wheelSelect), sep = "/")
+                         gsub('R.*\\.txt', '.txt', input$wheelSelect), 
+			 sep = "/")
       wheel <- read.delim(wheelfile)
     } else {
       # load wheelfile for time calculation
       wheelfile <- paste("/mnt/shared/CFAMS/CFAMS Wheels", 
-                         gsub('R.*\\.XLS', '.xlsx', input$wheelSelect), sep = "/")
+                         gsub('R.*\\.XLS', '.xlsx', input$wheelSelect), 
+			 sep = "/")
       wheel <- read_excel(wheelfile)
     }
       
@@ -181,17 +186,22 @@ shinyServer(function(input, output, clientData, session) {
         theme(axis.title.y = element_text(size=16), 
               axis.text.y  = element_text(size=12)) 
       
-      g2 <- ggplot(data, aes(Pos, cor1412he, color = Num)) + geom_boxplot() + 
-        colScale() + ggtitle("13/12C corrected 14/12 Ratio") +
+      g2 <- ggplot(data, aes(Pos, cor1412he, color = Num)) + 
+        geom_boxplot() + 
+        colScale() + 
+	ggtitle("13/12C corrected 14/12 Ratio") +
         ylab(expression(paste("14/12C (x", 10^{-12},")"))) +
         theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
-        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12)) 
+        theme(axis.title.y = element_text(size=16), 
+	      axis.text.y  = element_text(size=12)) 
       
-      g3 <- ggplot(data, aes(factor(Pos), he12C, color = Num)) + geom_boxplot() + 
+      g3 <- ggplot(data, aes(factor(Pos), he12C, color = Num)) +
+        geom_boxplot() + 
         colScale() + ggtitle("12C Boxplot") +
         ylab(expression(paste("He 12C (", mu,"A)"))) +
         theme(axis.title.x = element_blank()) + #theme(legend.position="none") +
-        theme(axis.title.y = element_text(size=16), axis.text.y  = element_text(size=12))
+        theme(axis.title.y = element_text(size=16),
+              axis.text.y  = element_text(size=12))
       plots <- list(g1, g2, g3)
     } else {
       
